@@ -120,6 +120,7 @@ class _CalendarScreenState extends State<CalendarScreen>
                   duration: Duration(milliseconds: 300),
                   height: _calendarHeight,
                   child: TableCalendar(
+                    locale: 'ko_KR',
                     firstDay: DateTime.utc(2020, 1, 1),
                     lastDay: DateTime.now(),
                     focusedDay: _focusedDay,

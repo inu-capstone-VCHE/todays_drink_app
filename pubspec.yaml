@@ -10,6 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  intl: ^0.18.0
 
   cupertino_icons: ^1.0.8
   table_calendar: ^3.0.9
@@ -22,14 +23,26 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  # ✅ assets 폴더 추가 (만약 필요한 경우)
   assets:
-  - assets/alcohols5.png
+    - assets/alcohols5.png
 
-  # ✅ 폰트 추가 예시 (필요한 경우)
   fonts:
-    - family: CustomFont
+    - family: NotoSansKR
       fonts:
-        - asset: assets/fonts/CustomFont-Regular.ttf
-        - asset: assets/fonts/CustomFont-Bold.ttf
+        - asset: assets/fonts/NotoSansKR-Regular.ttf
+        - asset: assets/fonts/NotoSansKR-Bold.ttf
           weight: 700
+        - asset: assets/fonts/NotoSansKR-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/NotoSansKR-Light.ttf
+          weight: 300
+        - asset: assets/fonts/NotoSansKR-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/NotoSansKR-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/NotoSansKR-Thin.ttf
+          weight: 100
+        - asset: assets/fonts/NotoSansKR-ExtraLight.ttf
+          weight: 200
+        - asset: assets/fonts/NotoSansKR-Black.ttf
+          weight: 900

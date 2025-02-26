@@ -22,7 +22,7 @@ class StartScreen extends StatelessWidget {
               Column(
                 children: [
                   Text(
-                    "잔 속 위기, AI로 막는다!",
+                    "잔 속 취기, AI로 읽는다!",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 16,
