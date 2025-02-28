@@ -78,6 +78,7 @@ class _CalendarScreenState extends State<CalendarScreen>
             Text(
               "${_focusedDay.year}. ${_focusedDay.month}",
               style: TextStyle(
+                fontFamily: 'NotoSansKR', // 🔥 폰트 적용
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
                 fontStyle: FontStyle.italic,
@@ -137,9 +138,14 @@ class _CalendarScreenState extends State<CalendarScreen>
                     },
                     headerVisible: false,
                     calendarStyle: CalendarStyle(
+                      defaultTextStyle: TextStyle(
+                        fontFamily: 'NotoSansKR', // 🔥 기본 날짜 폰트 적용
+                        fontSize: 16,
+                        color: Colors.black,
+                      ),
                       todayDecoration: BoxDecoration(
                         color: (_selectedDay == null ||
-                                isSameDay(_selectedDay, DateTime.now()))
+                            isSameDay(_selectedDay, DateTime.now()))
                             ? Color(0xFFF2D027)
                             : Colors.transparent,
                         shape: BoxShape.circle,
@@ -149,17 +155,25 @@ class _CalendarScreenState extends State<CalendarScreen>
                         shape: BoxShape.circle,
                       ),
                       todayTextStyle: TextStyle(
+                        fontFamily: 'NotoSansKR', // 🔥 오늘 날짜 폰트 적용
                         color: Colors.black,
                         fontWeight: FontWeight.normal,
                       ),
                       selectedTextStyle: TextStyle(
+                        fontFamily: 'NotoSansKR', // 🔥 선택된 날짜 폰트 적용
                         color: Colors.black,
                         fontWeight: FontWeight.normal,
                       ),
                     ),
                     daysOfWeekStyle: DaysOfWeekStyle(
-                      weekdayStyle: TextStyle(color: Colors.black),
-                      weekendStyle: TextStyle(color: Colors.black),
+                      weekdayStyle: TextStyle(
+                        fontFamily: 'NotoSansKR', // 🔥 요일 폰트 적용
+                        color: Colors.black,
+                      ),
+                      weekendStyle: TextStyle(
+                        fontFamily: 'NotoSansKR', // 🔥 주말 폰트 적용
+                        color: Colors.black,
+                      ),
                     ),
                   ),
                 ),
@@ -180,7 +194,7 @@ class _CalendarScreenState extends State<CalendarScreen>
                       child: Container(
                         width: double.infinity,
                         padding:
-                            EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                         color: Colors.grey[200],
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
@@ -202,7 +216,10 @@ class _CalendarScreenState extends State<CalendarScreen>
                               child: Text(
                                 "${_selectedDay!.year}.${_selectedDay!.month}.${_selectedDay!.day}",
                                 style: TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.bold),
+                                  fontFamily: 'NotoSansKR', // 🔥 음주 기록 날짜 폰트 적용
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                             Expanded(
@@ -211,7 +228,10 @@ class _CalendarScreenState extends State<CalendarScreen>
                                   "작성한 기록이 아직 없어!\n음주 기록을 작성해볼까?",
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                      color: Colors.grey, fontSize: 12),
+                                    fontFamily: 'NotoSansKR', // 🔥 메시지 폰트 적용
+                                    color: Colors.grey,
+                                    fontSize: 12,
+                                  ),
                                 ),
                               ),
                             ),

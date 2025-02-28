@@ -25,6 +25,8 @@ flutter:
 
   assets:
     - assets/alcohols5.png
+    - assets/beer.png
+    - assets/soju.png
 
   fonts:
     - family: NotoSansKR
@@ -46,3 +48,6 @@ flutter:
           weight: 200
         - asset: assets/fonts/NotoSansKR-Black.ttf
           weight: 900
+    - family: BMJUA
+      fonts:
+        - asset: assets/fonts/BMJUA_ttf.ttf

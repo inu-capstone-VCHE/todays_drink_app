@@ -6,52 +6,50 @@ class StartScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // AppBar를 빼고, 화면 전체를 사용하도록 설정
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          // 위/아래 공간을 여유 있게 주고 싶으면 vertical 패딩도 추가
-          child: Column(
-            // 공간을 골고루 분배하여, 텍스트는 중앙쯤, 이미지는 아래쪽에 위치
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // 상단에 일부러 공간을 조금 더 두고 싶다면 SizedBox를 추가할 수도 있음
-              // SizedBox(height: 50),
-
-              // 가운데 영역(텍스트)
-              Column(
-                children: [
-                  Text(
-                    "잔 속 취기, AI로 읽는다!",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey[800],
-                      fontWeight: FontWeight.bold,
-                    ),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center, // 🔥 전체를 완벽하게 중앙 정렬
+        crossAxisAlignment: CrossAxisAlignment.center, // 🔥 가로 정렬도 중앙
+        children: [
+          Expanded( // 🔥 전체적으로 아래로 배치
+            flex: 2,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center, // 🔥 내부 정렬도 중앙
+              children: [
+                Text(
+                  "잔 속 취기, AI로 읽는다!",
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontFamily: "NotoSansKR",
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey,
                   ),
-                  SizedBox(height: 12),
-                  Text(
-                    "오늘의 한 잔",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 28,
-                      color: Colors.teal, // 원하는 색상으로 변경
-                      fontWeight: FontWeight.bold,
-                    ),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  "오늘의 한 잔",
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 38,
+                    fontFamily: "BMJUA",
+                    fontWeight: FontWeight.normal,
+                    color: Colors.teal,
                   ),
-                ],
-              ),
-
-              // 하단 이미지
-              Image.asset(
-                'assets/alcohols5.png',
-                // 원하는 크기가 있다면 width나 height를 지정
-                // 예: width: 200, height: 100
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
-        ),
+          Expanded( // 🔥 이미지도 중간 정렬
+            flex: 3,
+            child: Align(
+              alignment: Alignment.center, // 🔥 이미지 중앙 배치
+              child: Image.asset(
+                'assets/alcohols5.png',
+                width: 270,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
