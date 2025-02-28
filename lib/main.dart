@@ -14,6 +14,18 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      home: StartScreen()
+    );
+  }
+}
+
+
+
+/*
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
       title: '오늘의 한 잔',
       debugShowCheckedModeBanner: false,
       home: StartScreenWithDelay(), // ✅ 시작 화면 유지
@@ -31,7 +43,7 @@ class _StartScreenWithDelayState extends State<StartScreenWithDelay> {
   void initState() {
     super.initState();
     // ✅ 3초 후 CalendarScreen으로 이동
-    Timer(Duration(seconds: 3), () {
+    Timer(Duration(seconds: 100), () {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => CalendarScreen()),
@@ -44,3 +56,4 @@ class _StartScreenWithDelayState extends State<StartScreenWithDelay> {
     return StartScreen(); // ✅ 시작 화면 먼저 표시
   }
 }
+*/
