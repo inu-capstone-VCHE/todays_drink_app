@@ -22,9 +22,7 @@ class _DrinkingRecordScreenState extends State<DrinkingRecordScreen> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: () async {
-        return true;
-      },
+      onWillPop: () async => true,
       child: Scaffold(
         backgroundColor: Color(0xFFF8F8F8),
         appBar: AppBar(
@@ -81,10 +79,10 @@ class _DrinkingRecordScreenState extends State<DrinkingRecordScreen> {
                               hintStyle: TextStyle(
                                 fontFamily: "NotoSansKR",
                                 fontSize: 16,
-                                color: Colors.grey, // 🔥 placeholder 회색
+                                color: Colors.grey,
                               ),
                               contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 14), // 🔥 높이 조정
+                                  horizontal: 12, vertical: 14),
                               border: OutlineInputBorder(
                                 borderSide: BorderSide(color: Colors.grey),
                                 borderRadius: BorderRadius.circular(8),
@@ -93,7 +91,7 @@ class _DrinkingRecordScreenState extends State<DrinkingRecordScreen> {
                                 borderSide: BorderSide(color: Colors.black),
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              counterText: "", // 🔥 "0/20" 중복 제거
+                              counterText: "",
                             ),
                             cursorColor: Colors.black,
                           ),
@@ -116,7 +114,6 @@ class _DrinkingRecordScreenState extends State<DrinkingRecordScreen> {
                 ),
               ),
               SizedBox(height: 20),
-              // 🔥 "얼마나 마셨어?" 네모칸 (오늘의 기록 네모랑 동일한 스타일)
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 16),
                 padding: EdgeInsets.all(16),
@@ -125,7 +122,7 @@ class _DrinkingRecordScreenState extends State<DrinkingRecordScreen> {
                   borderRadius: BorderRadius.circular(10),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withOpacity(0.3), // 🔥 그림자 추가
+                      color: Colors.grey.withOpacity(0.3),
                       blurRadius: 5,
                       spreadRadius: 1,
                     ),
@@ -147,7 +144,7 @@ class _DrinkingRecordScreenState extends State<DrinkingRecordScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         _buildDrinkButton("소주", "assets/soju.png"),
-                        SizedBox(width: 20), // 🔥 버튼 간격 넓힘
+                        SizedBox(width: 60), // 🔥 버튼 간격 조정
                         _buildDrinkButton("맥주", "assets/beer.png"),
                       ],
                     ),
@@ -158,6 +155,7 @@ class _DrinkingRecordScreenState extends State<DrinkingRecordScreen> {
               Container(
                 width: double.infinity,
                 height: 50,
+                color: Color(0xFFF8F8F8), // 🔥 배경 색 통일
                 child: ElevatedButton(
                   onPressed: () {},
                   style: ElevatedButton.styleFrom(
@@ -189,24 +187,22 @@ class _DrinkingRecordScreenState extends State<DrinkingRecordScreen> {
     return Column(
       children: [
         Container(
-          width: 55,
-          height: 55,
+          width: 42,
+          height: 42,
           decoration: BoxDecoration(
+            color: Color(0xFFECECEC),
             shape: BoxShape.circle,
-            color: Colors.grey[200], // 🔥 배경 유지 (연한 회색)
           ),
-          child: ClipOval(
-            child: Padding(
-              padding: EdgeInsets.all(7), // 🔥 이미지 크기 줄이기 (여백 추가)
-              child: Image.asset(
-                assetPath,
-                width: 38, // 🔥 이미지 크기 조절
-                height: 38,
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) {
-                  return Icon(Icons.error, size: 38, color: Colors.red);
-                },
-              ),
+          child: Padding(
+            padding: EdgeInsets.all(5),
+            child: Image.asset(
+              assetPath,
+              width: 32,
+              height: 32,
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) {
+                return Icon(Icons.error, size: 32, color: Colors.red);
+              },
             ),
           ),
         ),
