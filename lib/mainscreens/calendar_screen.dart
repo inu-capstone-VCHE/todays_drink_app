@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'drinking_record_screen.dart';
+import 'drunkenness_screen.dart';
 
 class CalendarScreen extends StatefulWidget {
   @override
@@ -28,6 +29,56 @@ class _CalendarScreenState extends State<CalendarScreen>
     _slideAnimation = CurvedAnimation(
       parent: _animationController,
       curve: Curves.easeInOut,
+    );
+  }
+
+  Widget _buildDrawer() {
+    return Drawer(
+      child: Padding(
+        padding: const EdgeInsets.only(top: 60.0, left: 20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "닉네임",
+              style: TextStyle(
+                fontFamily: 'NotoSansKR',
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 40),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => DrunkennessScreen()),
+                );
+              },
+              child: Text(
+                "취기 측정 모드",
+                style: TextStyle(
+                    fontFamily: 'NotoSansKR',
+                    fontSize: 18
+                ),
+              ),
+            ),
+            SizedBox(height: 20),
+            GestureDetector(
+              onTap: () {
+                // TODO: 설정 기능 추가
+              },
+              child: Text(
+                "설정",
+                style: TextStyle(
+                    fontFamily: 'NotoSansKR',
+                    fontSize: 18
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -67,6 +118,7 @@ class _CalendarScreenState extends State<CalendarScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      endDrawer: _buildDrawer(),
       appBar: AppBar(
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -101,10 +153,14 @@ class _CalendarScreenState extends State<CalendarScreen>
           onPressed: () {},
         ),
         actions: [
-          IconButton(
-            icon: Icon(Icons.menu),
-            onPressed: () {},
-          ),
+          Builder(
+            builder: (context) => IconButton(
+              icon: Icon(Icons.menu),
+              onPressed: () {
+                Scaffold.of(context).openEndDrawer();
+              },
+            ),
+          )
         ],
       ),
       body: GestureDetector(
