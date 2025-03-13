@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../loginscreen/loginDefault_screen.dart'; // ✅ 로그인 화면 import
+import '../loginscreen/signup_screen.dart';     // ✅ 회원가입 화면 import
 
 class StartScreen2 extends StatelessWidget {
   const StartScreen2({Key? key}) : super(key: key);
@@ -48,7 +50,11 @@ class StartScreen2 extends StatelessWidget {
               height: 50,
               child: ElevatedButton(
                 onPressed: () {
-                  // TODO: 로그인 기능 추가
+                  // ✅ 로그인 버튼 클릭 시 LoginDefaultScreen으로 이동
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => LoginDefaultScreen()),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2D6876), // 📌 버튼 색상 (진한 청록색)
@@ -75,7 +81,11 @@ class StartScreen2 extends StatelessWidget {
               height: 50,
               child: OutlinedButton(
                 onPressed: () {
-                  // TODO: 회원가입 기능 추가
+                  // ✅ 회원가입 버튼 클릭 시 SignupScreen으로 이동
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => SignupScreen()),
+                  );
                 },
                 style: OutlinedButton.styleFrom(
                   side: const BorderSide(color: Color(0xFF2D6876), width: 2), // 📌 테두리 추가

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'signup_screen.dart'; // ✅ 회원가입 화면 import
 
 class LoginDefaultScreen extends StatefulWidget {
   const LoginDefaultScreen({Key? key}) : super(key: key);
@@ -20,7 +21,6 @@ class _LoginDefaultScreenState extends State<LoginDefaultScreen> {
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context), // 🔙 뒤로 가기 기능
         ),
-        backgroundColor: Colors.white,
         elevation: 0, // 그림자 제거
       ),
       body: Padding(
@@ -39,7 +39,7 @@ class _LoginDefaultScreenState extends State<LoginDefaultScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 40), // 🔥 타이틀 아래 간격
+            const SizedBox(height: 40),
 
             // ✅ 이메일 입력 필드
             const Text("이메일", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
@@ -95,11 +95,15 @@ class _LoginDefaultScreenState extends State<LoginDefaultScreen> {
 
             const SizedBox(height: 20),
 
-            // ✅ 회원가입 버튼 (텍스트 버튼)
+            // ✅ 회원가입 버튼 (제대로 작동하도록 수정)
             Center(
               child: GestureDetector(
                 onTap: () {
-                  // TODO: 회원가입 페이지 이동
+                  print("회원가입 버튼 클릭됨! 🚀"); // ✅ 디버깅용 출력 (필요하면 확인)
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => SignupScreen()), // ✅ 회원가입 화면 이동
+                  );
                 },
                 child: const Text.rich(
                   TextSpan(
@@ -108,7 +112,12 @@ class _LoginDefaultScreenState extends State<LoginDefaultScreen> {
                     children: [
                       TextSpan(
                         text: "회원가입",
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF2D6876)),
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF2D6876),
+                          decoration: TextDecoration.underline, // ✅ 밑줄 추가
+                        ),
                       ),
                     ],
                   ),
