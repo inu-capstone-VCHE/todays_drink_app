@@ -24,8 +24,9 @@ class _DrinkingRecordScreenState extends State<DrinkingRecordScreen> {
     return WillPopScope(
       onWillPop: () async => true,
       child: Scaffold(
-        backgroundColor: Color(0xFFF8F8F8),
+        backgroundColor: Colors.white,
         appBar: AppBar(
+          backgroundColor: Colors.white,
           automaticallyImplyLeading: false,
           title: Text(
             "음주 기록",
