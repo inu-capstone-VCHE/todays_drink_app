@@ -11,6 +11,7 @@ class StartScreen2 extends StatelessWidget {
     double screenWidth = MediaQuery.of(context).size.width; // 📌 화면 너비 가져오기
 
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Center( // 📌 전체를 중앙 정렬
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start, // 📌 위에서부터 정렬

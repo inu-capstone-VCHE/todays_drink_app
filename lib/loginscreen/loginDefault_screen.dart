@@ -16,7 +16,9 @@ class _LoginDefaultScreenState extends State<LoginDefaultScreen> {
     double screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
+        backgroundColor: Colors.white,
       appBar: AppBar(
+          backgroundColor: Colors.white,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context), // 🔙 뒤로 가기 기능

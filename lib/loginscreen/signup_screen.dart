@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../launchscreen/start_screen2.dart'; // ✅ 회원가입 완료 후 이동할 화면 import
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({Key? key}) : super(key: key);
@@ -17,13 +18,20 @@ class _SignupScreenState extends State<SignupScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("회원가입"),
+        title: const Text(
+          "회원가입",
+          style: TextStyle(
+            fontWeight: FontWeight.bold, // ✅ 볼드체 적용
+            fontSize: 20, // ✅ 기본 폰트 크기 유지
+            color: Colors.black, // ✅ 글자색 유지
+          ),
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context), // 🔙 뒤로 가기 기능
         ),
         elevation: 0, // 그림자 제거
-        backgroundColor: Colors.transparent, // ✅ 배경색 투명 (기본 배경 유지)
+        backgroundColor: Colors.white, // ✅ 배경 흰색 유지
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -55,55 +63,86 @@ class _SignupScreenState extends State<SignupScreen> {
               });
             }),
 
-            // ✅ 닉네임 입력 필드 + 중복 확인 버튼
+            // ✅ 닉네임 입력 필드 + 중복 확인 버튼 (크기 완벽하게 맞춤)
             Row(
               children: [
                 Expanded(
+                  flex: 2, // ✅ 닉네임 필드 비율 설정
                   child: buildInputField(Icons.person, "닉네임"),
                 ),
-                const SizedBox(width: 10),
-                ElevatedButton(
-                  onPressed: () {
-                    // TODO: 닉네임 중복 확인 기능 추가
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFB0C4DE), // 버튼 색상 (연한 청록색)
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                const SizedBox(width: 20),
+                SizedBox(
+                  width: 110, // ✅ 버튼 크기 고정
+                  height: 30, // ✅ 입력 필드와 동일한 높이
+                  child: ElevatedButton(
+                    onPressed: () {
+                      // TODO: 닉네임 중복 확인 기능 추가
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFB0C4DE), // 버튼 색상 (연한 청록색)
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
-                  ),
-                  child: const Text(
-                    "중복 확인",
-                    style: TextStyle(fontSize: 14, color: Colors.white),
+                    child: const Text(
+                      "중복 확인",
+                      style: TextStyle(fontSize: 14, color: Colors.white),
+                    ),
                   ),
                 ),
               ],
             ),
 
-            const SizedBox(height: 30), // 🔥 버튼 위 여백
+            const Spacer(), // 🔥 나머지 공간을 모두 차지하도록 추가
 
-            // ✅ 계속하기 버튼
+            // ✅ 회원가입 완료 버튼 (맨 아래 배치 + 팝업 + 화면 이동)
             SizedBox(
               width: screenWidth,
               height: 50,
               child: ElevatedButton(
                 onPressed: () {
-                  // TODO: 회원가입 진행
+                  _showSignupSuccessDialog(context); // ✅ 회원가입 성공 팝업 띄우기
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2D6876), // 버튼 색상 (진한 청록색)
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
                 child: const Text(
-                  "계속하기",
+                  "회원가입 완료",
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: Colors.white),
                 ),
               ),
             ),
+            const SizedBox(height: 20), // 🔥 버튼 아래 여백 추가
           ],
         ),
       ),
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor, // ✅ 배경색 원래 기본값 유지
+      backgroundColor: Colors.white, // ✅ 배경 흰색 유지
+    );
+  }
+
+  // 🔥 회원가입 성공 팝업 + StartScreen2 이동
+  void _showSignupSuccessDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("회원가입 성공!🎉🎉"),
+          content: const Text("회원가입이 완료되었습니다."),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // ✅ 팝업 닫기
+                Navigator.pushReplacement( // ✅ StartScreen2로 이동
+                  context,
+                  MaterialPageRoute(builder: (context) => const StartScreen2()),
+                );
+              },
+              child: const Text("확인"),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -116,7 +155,7 @@ class _SignupScreenState extends State<SignupScreen> {
           hintText: hintText,
           prefixIcon: Icon(icon, color: Colors.grey),
           filled: true,
-          fillColor: Theme.of(context).scaffoldBackgroundColor, // ✅ 배경색을 화면 배경과 동일하게 설정
+          fillColor: Colors.white, // ✅ 배경 흰색
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
             borderSide: BorderSide(color: Colors.grey[300]!, width: 1), // ✅ 얇은 실선 테두리 추가
@@ -149,7 +188,7 @@ class _SignupScreenState extends State<SignupScreen> {
             onPressed: () => toggleVisibility(!isVisible),
           ),
           filled: true,
-          fillColor: Theme.of(context).scaffoldBackgroundColor, // ✅ 배경색을 화면 배경과 동일하게 설정
+          fillColor: Colors.white, // ✅ 배경 흰색
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
             borderSide: BorderSide(color: Colors.grey[300]!, width: 1), // ✅ 얇은 실선 테두리 추가
