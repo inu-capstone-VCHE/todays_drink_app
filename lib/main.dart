@@ -6,22 +6,7 @@ import 'launchscreen/start_screen2.dart';
 import 'mainscreens/calendar_screen.dart';
 import 'loginscreen/loginDefault_screen.dart';
 
-void main() {
-  runApp(MyApp());
-}
 
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: '오늘의 한 잔',
-      debugShowCheckedModeBanner: false,
-      home: LoginDefaultScreen(), // ✅ StartScreen2 실행
-    );
-  }
-}
-
-/*
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // ✅ 비동기 초기화 보장
   await initializeDateFormatting('ko_KR', null); // ✅ 한글 로케일 데이터 초기화
@@ -62,4 +47,3 @@ class _StartScreenWithDelayState extends State<StartScreenWithDelay> {
     return StartScreen(); // ✅ 시작 화면 먼저 표시
   }
 }
-*/
