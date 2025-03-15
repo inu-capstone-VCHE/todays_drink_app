@@ -34,6 +34,7 @@ class _CalendarScreenState extends State<CalendarScreen>
 
   Widget _buildDrawer() {
     return Drawer(
+      backgroundColor: Colors.white,
       child: Padding(
         padding: const EdgeInsets.only(top: 60.0, left: 20.0),
         child: Column(

@@ -17,6 +17,11 @@ class _DrinkingRecordScreenState extends State<DrinkingRecordScreen> {
   double _beerAmount = 1.0;
   bool _isBeerSelected = false; // 맥주 관련 변수
 
+  // 버튼 활성화 여부 확인 함수
+  bool _isFormValid() {
+    return _textController.text.isNotEmpty && (_isSojuSelected || _isBeerSelected);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -27,7 +32,75 @@ class _DrinkingRecordScreenState extends State<DrinkingRecordScreen> {
     });
   }
 
-  void _showUnitSelectionSheet() {
+  void _showExitDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          backgroundColor: Colors.white,
+          title: Text(
+            "페이지 나가기",
+            style: TextStyle(
+              fontFamily: "NotoSansKR",
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          content: Text(
+            "작성한 내용은 저장되지 않아!",
+            style: TextStyle(
+              fontFamily: "NotoSansKR",
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // 다이얼로그만 닫기
+              },
+              style: TextButton.styleFrom(
+                side: BorderSide(color: Colors.black),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                minimumSize: Size(120, 48),
+              ),
+              child: Text("계속 작성하기",
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontFamily: "NotoSansKR",
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                  ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context); // 다이얼로그 닫기
+                Navigator.pop(context); // 캘린더 화면으로 이동
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                minimumSize: Size(120, 48),
+              ),
+              child: Text("나가기",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontFamily: "NotoSansKR",
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                  ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
+  void _showSojuSelectionSheet() {
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
@@ -40,7 +113,26 @@ class _DrinkingRecordScreenState extends State<DrinkingRecordScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                title: Text("병으로 체크"),
+                title: Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: "병", // ✅ "병"만 굵게
+                        style: TextStyle(
+                            fontFamily: "NotoSansKR",
+                            fontWeight: FontWeight.bold
+                        ),
+                      ),
+                      TextSpan(
+                        text: "으로 체크", // ✅ "으로 체크"는 일반 글씨
+                        style: TextStyle(
+                            fontFamily: "NotoSansKR",
+                            fontWeight: FontWeight.normal
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 onTap: () {
                   setState(() {
                     _selectedSojuUnit = "병";
@@ -50,7 +142,26 @@ class _DrinkingRecordScreenState extends State<DrinkingRecordScreen> {
                 },
               ),
               ListTile(
-                title: Text("잔으로 체크"),
+                title: Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: "잔", // ✅ "잔"만 굵게
+                        style: TextStyle(
+                            fontFamily: "NotoSansKR",
+                            fontWeight: FontWeight.bold
+                        ),
+                      ),
+                      TextSpan(
+                        text: "으로 체크",
+                        style: TextStyle(
+                            fontFamily: "NotoSansKR",
+                            fontWeight: FontWeight.normal
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 onTap: () {
                   setState(() {
                     _selectedSojuUnit = "잔";
@@ -66,7 +177,143 @@ class _DrinkingRecordScreenState extends State<DrinkingRecordScreen> {
     );
   }
 
-  void _showDeleteDialog() {
+
+  void _showBeerSelectionSheet() {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return Container(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: "병", // ✅ "병"만 굵게
+                        style: TextStyle(
+                            fontFamily: "NotoSansKR",
+                            fontWeight: FontWeight.bold
+                        ),
+                      ),
+                      TextSpan(
+                        text: "으로 체크", // ✅ "으로 체크"는 일반 글씨
+                        style: TextStyle(
+                            fontFamily: "NotoSansKR",
+                            fontWeight: FontWeight.normal
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                onTap: () {
+                  setState(() {
+                    _selectedBeerUnit = "병";
+                    _isBeerSelected = true;
+                  });
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                title: Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: "잔", // ✅ "잔"만 굵게
+                        style: TextStyle(
+                            fontFamily: "NotoSansKR",
+                            fontWeight: FontWeight.bold
+                        ),
+                      ),
+                      TextSpan(
+                        text: "으로 체크",
+                        style: TextStyle(
+                            fontFamily: "NotoSansKR",
+                            fontWeight: FontWeight.normal
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                onTap: () {
+                  setState(() {
+                    _selectedBeerUnit = "잔";
+                    _isBeerSelected = true;
+                  });
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                title: Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: "캔", // ✅ "캔"만 굵게
+                        style: TextStyle(
+                            fontFamily: "NotoSansKR",
+                            fontWeight: FontWeight.bold
+                        ),
+                      ),
+                      TextSpan(
+                        text: "으로 체크",
+                        style: TextStyle(
+                            fontFamily: "NotoSansKR",
+                            fontWeight: FontWeight.normal
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                onTap: () {
+                  setState(() {
+                    _selectedBeerUnit = "캔";
+                    _isBeerSelected = true;
+                  });
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                title: Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: "500ml", // ✅ "500ml"만 굵게
+                        style: TextStyle(
+                            fontFamily: "NotoSansKR",
+                            fontWeight: FontWeight.bold
+                        ),
+                      ),
+                      TextSpan(
+                        text: "로 체크",
+                        style: TextStyle(
+                            fontFamily: "NotoSansKR",
+                            fontWeight: FontWeight.normal
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                onTap: () {
+                  setState(() {
+                    _selectedBeerUnit = "500ml";
+                    _isBeerSelected = true;
+                  });
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showDeleteDialog({required bool isSoju}) {
     showDialog(
       context: context,
       builder: (context) {
@@ -78,57 +325,67 @@ class _DrinkingRecordScreenState extends State<DrinkingRecordScreen> {
             style: TextStyle(
               fontFamily: "NotoSansKR",
               fontSize: 20,
-              fontWeight: FontWeight.w700,),
+              fontWeight: FontWeight.w700,
+            ),
           ),
-          contentPadding: EdgeInsets.symmetric(horizontal: 24, vertical: 10), // 네모칸 더 길게
+          contentPadding: EdgeInsets.symmetric(horizontal: 24, vertical: 10),
           content: Text(
-              "입력한 내용을 삭제하겠어?",
-              style: TextStyle(
-                fontFamily: "NotoSansKR",
-                fontSize: 15,
-                fontWeight: FontWeight.w500,),
+            "입력한 내용을 삭제할까?",
+            style: TextStyle(
+              fontFamily: "NotoSansKR",
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+            ),
           ),
           actions: [
             SizedBox(
-              width: double.infinity, // 버튼이 길어지도록 설정
+              width: double.infinity,
               child: Row(
                 children: [
                   Expanded(
                     child: TextButton(
                       onPressed: () {
-                        Navigator.pop(context); // 닫기 버튼 → 유지
+                        Navigator.pop(context);
                       },
                       style: TextButton.styleFrom(
                         side: BorderSide(color: Colors.black),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        minimumSize: Size(double.infinity, 48), // 길고 얇게 설정
+                        minimumSize: Size(double.infinity, 48),
                       ),
                       child: Text(
                         "닫기",
                         style: TextStyle(
-                            color: Colors.black,
-                            fontFamily: "NotoSansKR",
-                            fontSize: 15,
-                            fontWeight: FontWeight.w500,
+                          color: Colors.black,
+                          fontFamily: "NotoSansKR",
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
                   ),
-                  SizedBox(width: 8), // 버튼 간 간격
+                  SizedBox(width: 8),
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
                         setState(() {
-                          _selectedSojuUnit = null;
-                          _isSojuSelected = false;
-                          _sojuAmount = 1.0; // 🎯 삭제하면 소주 잔 수도 초기화
+                          if (isSoju) {
+                            // ✅ 소주 삭제
+                            _selectedSojuUnit = null;
+                            _isSojuSelected = false;
+                            _sojuAmount = 1.0;
+                          } else {
+                            // ✅ 맥주 삭제
+                            _selectedBeerUnit = null;
+                            _isBeerSelected = false;
+                            _beerAmount = 1.0;
+                          }
                         });
                         Navigator.pop(context); // 팝업 닫기
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.black,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        minimumSize: Size(double.infinity, 48), // 길고 얇게 설정
+                        minimumSize: Size(double.infinity, 48),
                       ),
                       child: Text(
                         "삭제",
@@ -137,7 +394,7 @@ class _DrinkingRecordScreenState extends State<DrinkingRecordScreen> {
                           fontFamily: "NotoSansKR",
                           fontSize: 15,
                           fontWeight: FontWeight.w500,
-                        ), // 글씨 색상을 흰색으로 강제 지정
+                        ),
                       ),
                     ),
                   ),
@@ -150,10 +407,14 @@ class _DrinkingRecordScreenState extends State<DrinkingRecordScreen> {
     );
   }
 
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: () async => true,
+      onWillPop: () async {
+        _showExitDialog();
+        return false;
+      },
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
@@ -171,9 +432,7 @@ class _DrinkingRecordScreenState extends State<DrinkingRecordScreen> {
           actions: [
             IconButton(
               icon: Icon(Icons.close),
-              onPressed: () {
-                Navigator.pop(context);
-              },
+              onPressed: _showExitDialog,
             ),
           ],
         ),
@@ -192,7 +451,7 @@ class _DrinkingRecordScreenState extends State<DrinkingRecordScreen> {
                     Container(
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(10),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.grey.withOpacity(0.3),
@@ -206,18 +465,17 @@ class _DrinkingRecordScreenState extends State<DrinkingRecordScreen> {
                           TextField(
                             controller: _textController,
                             maxLength: 20,
+                            onChanged: (text) {
+                              setState(() {}); // ✅ 텍스트 입력될 때마다 UI 업데이트 (완료 버튼 상태 반영)
+                            },
                             decoration: InputDecoration(
                               hintText: "오늘의 기록",
-                              contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 14),
-                              border: OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.grey),
-                                borderRadius: BorderRadius.circular(8),
+                              hintStyle: TextStyle(
+                                fontFamily: "NotoSansKR",
+                                color: Colors.grey[400],
                               ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.black),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
+                              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                              border: InputBorder.none,
                               counterText: "",
                             ),
                             cursorColor: Colors.black,
@@ -268,9 +526,17 @@ class _DrinkingRecordScreenState extends State<DrinkingRecordScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        _buildDrinkButton("소주", "assets/soju.png", _isSojuSelected ? _showDeleteDialog : _showUnitSelectionSheet, _isSojuSelected),
-                        SizedBox(width: 60),
-                        _buildDrinkButton("맥주", "assets/beer.png", () {}, false),
+                        // 소주 버튼 삭제 호출 (소주만 삭제)
+                        _buildDrinkButton("소주", "assets/soju.png",
+                            _isSojuSelected ? () => _showDeleteDialog(isSoju: true) : _showSojuSelectionSheet,
+                            _isSojuSelected
+                        ),
+                        SizedBox(width: 80),
+                        // 맥주 버튼 삭제 호출 (맥주만 삭제)
+                        _buildDrinkButton("맥주", "assets/beer.png",
+                            _isBeerSelected ? () => _showDeleteDialog(isSoju: false) : _showBeerSelectionSheet,
+                            _isBeerSelected
+                        ),
                       ],
                     ),
                     if (_selectedSojuUnit != null)
@@ -292,7 +558,7 @@ class _DrinkingRecordScreenState extends State<DrinkingRecordScreen> {
                                 icon: Icon(Icons.remove),
                                 onPressed: () {
                                   setState(() {
-                                    if (_sojuAmount > 1.0) _sojuAmount -= 1.0;
+                                    if (_sojuAmount > 0.5) _sojuAmount -= 0.5;
                                   });
                                 },
                               ),
@@ -301,7 +567,7 @@ class _DrinkingRecordScreenState extends State<DrinkingRecordScreen> {
                                 icon: Icon(Icons.add),
                                 onPressed: () {
                                   setState(() {
-                                    _sojuAmount += 1.0;
+                                    _sojuAmount += 0.5;
                                   });
                                 },
                               ),
@@ -309,6 +575,44 @@ class _DrinkingRecordScreenState extends State<DrinkingRecordScreen> {
                           ),
                         ),
                       ),
+
+                    if (_selectedBeerUnit != null)
+                      Padding(
+                        padding: EdgeInsets.only(top: 15),
+                        child: Container(
+                          padding: EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[100],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: [
+                              Image.asset("assets/beer.png", width: 50, height: 50),
+                              SizedBox(width: 8),
+                              Text("맥주 ($_selectedBeerUnit)"),
+                              Spacer(),
+                              IconButton(
+                                icon: Icon(Icons.remove),
+                                onPressed: () {
+                                  setState(() {
+                                    if (_beerAmount > 0.5) _beerAmount -= 0.5;
+                                  });
+                                },
+                              ),
+                              Text("$_beerAmount"),
+                              IconButton(
+                                icon: Icon(Icons.add),
+                                onPressed: () {
+                                  setState(() {
+                                    _beerAmount += 0.5;
+                                  });
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
                   ],
                 ),
               ),
@@ -316,15 +620,23 @@ class _DrinkingRecordScreenState extends State<DrinkingRecordScreen> {
               Container(
                 width: double.infinity,
                 height: 50,
-                color: Color(0xFFF8F8F8),
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: _isFormValid()
+                    ? () {
+                      Navigator.pop(context); // ✅ 조건 충족 시 캘린더 화면으로 이동
+                    } : null, // ✅ 조건 충족 안 되면 버튼 비활성화
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    disabledBackgroundColor: Colors.grey[500],
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
+                    ),
                   child: Text(
                     "완료",
                     style: TextStyle(
+                      fontFamily: "NotoSansKR",
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: Colors.black,
+                      color: Colors.white,
                     ),
                   ),
                 ),
