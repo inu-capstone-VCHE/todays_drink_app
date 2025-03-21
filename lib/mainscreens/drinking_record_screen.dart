@@ -103,6 +103,7 @@ class _DrinkingRecordScreenState extends State<DrinkingRecordScreen> {
   void _showSojuSelectionSheet() {
     showModalBottomSheet(
       context: context,
+      backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -181,6 +182,7 @@ class _DrinkingRecordScreenState extends State<DrinkingRecordScreen> {
   void _showBeerSelectionSheet() {
     showModalBottomSheet(
       context: context,
+      backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -436,200 +438,208 @@ class _DrinkingRecordScreenState extends State<DrinkingRecordScreen> {
             ),
           ],
         ),
-        body: GestureDetector(
+        body: GestureDetector( // ✅ 화면 탭하면 키보드 닫기
           behavior: HitTestBehavior.translucent,
           onTap: () {
-            FocusScope.of(context).unfocus();
-          },
-          child: Column(
+            FocusScope.of(context).unfocus(); // ✅ 키보드 닫기
+          }, // GestureDetector onTap
+          child: Column( // ✅ 전체 화면을 감싸는 Column
             children: [
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.3),
-                            blurRadius: 5,
-                            spreadRadius: 1,
-                          ),
-                        ],
-                      ),
-                      child: Stack(
-                        children: [
-                          TextField(
-                            controller: _textController,
-                            maxLength: 20,
-                            onChanged: (text) {
-                              setState(() {}); // ✅ 텍스트 입력될 때마다 UI 업데이트 (완료 버튼 상태 반영)
-                            },
-                            decoration: InputDecoration(
-                              hintText: "오늘의 기록",
-                              hintStyle: TextStyle(
-                                fontFamily: "NotoSansKR",
-                                color: Colors.grey[400],
-                              ),
-                              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                              border: InputBorder.none,
-                              counterText: "",
+              Expanded( // ✅ 키보드가 올라와도 내용이 사라지지 않도록 Expanded 사용
+                child: SingleChildScrollView( // ✅ 키보드 올라오면 스크롤 가능하게 함
+                  child: Column( // ✅ 스크롤 가능한 내부 콘텐츠
+                    children: [
+                      Padding( // ✅ "오늘의 기록" 입력란
+                        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container( // ✅ 입력 필드 스타일 (둥근 테두리 & 그림자)
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(10),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.3),
+                                    blurRadius: 5,
+                                    spreadRadius: 1,
+                                  ),
+                                ],
+                              ), // BoxDecoration
+                              child: Stack( // ✅ 텍스트 필드 & 글자 수 카운트 겹쳐서 배치
+                                children: [
+                                  TextField( // ✅ "오늘의 기록" 입력 필드
+                                    controller: _textController,
+                                    maxLength: 20,
+                                    onChanged: (text) {
+                                      setState(() {}); // ✅ 텍스트 입력 시 UI 업데이트
+                                    }, // TextField onChanged
+                                    decoration: InputDecoration(
+                                      hintText: "오늘의 기록",
+                                      hintStyle: TextStyle(
+                                        fontFamily: "NotoSansKR",
+                                        color: Colors.grey[400],
+                                      ), // TextStyle
+                                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                                      border: InputBorder.none,
+                                      counterText: "",
+                                    ), // InputDecoration
+                                    cursorColor: Colors.black,
+                                  ), // TextField
+                                  Positioned( // ✅ 글자 수 카운트 표시
+                                    right: 12,
+                                    bottom: 10,
+                                    child: Text(
+                                      "$_charCount/20",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey,
+                                      ), // TextStyle
+                                    ), // Text
+                                  ), // Positioned
+                                ], // children (Stack)
+                              ), // Stack
+                            ), // Container
+                          ], // children (Column)
+                        ), // Column
+                      ), // Padding
+
+                      SizedBox(height: 20), // ✅ 위아래 여백 확보
+
+                      Container( // ✅ 소주/맥주 선택 영역
+                        margin: EdgeInsets.symmetric(horizontal: 16),
+                        padding: EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.3),
+                              blurRadius: 5,
+                              spreadRadius: 1,
                             ),
-                            cursorColor: Colors.black,
-                          ),
-                          Positioned(
-                            right: 12,
-                            bottom: 10,
-                            child: Text(
-                              "$_charCount/20",
+                          ],
+                        ), // BoxDecoration
+                        child: Column( // ✅ 소주/맥주 선택 UI
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "얼마나 마셨어?",
                               style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 20),
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 16),
-                padding: EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.3),
-                      blurRadius: 5,
-                      spreadRadius: 1,
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "얼마나 마셨어?",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    SizedBox(height: 15),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // 소주 버튼 삭제 호출 (소주만 삭제)
-                        _buildDrinkButton("소주", "assets/soju.png",
-                            _isSojuSelected ? () => _showDeleteDialog(isSoju: true) : _showSojuSelectionSheet,
-                            _isSojuSelected
-                        ),
-                        SizedBox(width: 80),
-                        // 맥주 버튼 삭제 호출 (맥주만 삭제)
-                        _buildDrinkButton("맥주", "assets/beer.png",
-                            _isBeerSelected ? () => _showDeleteDialog(isSoju: false) : _showBeerSelectionSheet,
-                            _isBeerSelected
-                        ),
-                      ],
-                    ),
-                    if (_selectedSojuUnit != null)
-                      Padding(
-                        padding: EdgeInsets.only(top: 15),
-                        child: Container(
-                          padding: EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[100], // 회색 박스
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            children: [
-                              Image.asset("assets/soju.png", width: 50, height: 50),
-                              SizedBox(width: 8),
-                              Text("소주 ($_selectedSojuUnit)"),
-                              Spacer(),
-                              IconButton(
-                                icon: Icon(Icons.remove),
-                                onPressed: () {
-                                  setState(() {
-                                    if (_sojuAmount > 0.5) _sojuAmount -= 0.5;
-                                  });
-                                },
-                              ),
-                              Text("$_sojuAmount"),
-                              IconButton(
-                                icon: Icon(Icons.add),
-                                onPressed: () {
-                                  setState(() {
-                                    _sojuAmount += 0.5;
-                                  });
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                              ), // TextStyle
+                            ), // Text
+                            SizedBox(height: 15), // ✅ 여백 추가
+                            Row( // ✅ 소주/맥주 선택 버튼
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                _buildDrinkButton("소주", "assets/soju.png",
+                                    _isSojuSelected ? () => _showDeleteDialog(isSoju: true) : _showSojuSelectionSheet,
+                                    _isSojuSelected), // 소주 버튼
+                                SizedBox(width: 80), // ✅ 버튼 사이 간격
+                                _buildDrinkButton("맥주", "assets/beer.png",
+                                    _isBeerSelected ? () => _showDeleteDialog(isSoju: false) : _showBeerSelectionSheet,
+                                    _isBeerSelected), // 맥주 버튼
+                              ], // children (Row)
+                            ), // Row
 
-                    if (_selectedBeerUnit != null)
-                      Padding(
-                        padding: EdgeInsets.only(top: 15),
-                        child: Container(
-                          padding: EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[100],
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            children: [
-                              Image.asset("assets/beer.png", width: 50, height: 50),
-                              SizedBox(width: 8),
-                              Text("맥주 ($_selectedBeerUnit)"),
-                              Spacer(),
-                              IconButton(
-                                icon: Icon(Icons.remove),
-                                onPressed: () {
-                                  setState(() {
-                                    if (_beerAmount > 0.5) _beerAmount -= 0.5;
-                                  });
-                                },
+                            if (_selectedSojuUnit != null)
+                              Padding(
+                                padding: EdgeInsets.only(top: 15),
+                                child: Container(
+                                  padding: EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[100], // 회색 박스
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Image.asset("assets/soju.png", width: 50, height: 50),
+                                      SizedBox(width: 8),
+                                      Text("소주 ($_selectedSojuUnit)"),
+                                      Spacer(),
+                                      IconButton(
+                                        icon: Icon(Icons.remove),
+                                        onPressed: () {
+                                          setState(() {
+                                            if (_sojuAmount > 0.5) _sojuAmount -= 0.5;
+                                          });
+                                        },
+                                      ),
+                                      Text("$_sojuAmount"),
+                                      IconButton(
+                                        icon: Icon(Icons.add),
+                                        onPressed: () {
+                                          setState(() {
+                                            _sojuAmount += 0.5;
+                                          });
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
-                              Text("$_beerAmount"),
-                              IconButton(
-                                icon: Icon(Icons.add),
-                                onPressed: () {
-                                  setState(() {
-                                    _beerAmount += 0.5;
-                                  });
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
 
-                  ],
-                ),
-              ),
-              Spacer(),
-              Container(
+                            if (_selectedBeerUnit != null)
+                              Padding(
+                                padding: EdgeInsets.only(top: 15),
+                                child: Container(
+                                  padding: EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[100],
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Image.asset("assets/beer.png", width: 50, height: 50),
+                                      SizedBox(width: 8),
+                                      Text("맥주 ($_selectedBeerUnit)"),
+                                      Spacer(),
+                                      IconButton(
+                                        icon: Icon(Icons.remove),
+                                        onPressed: () {
+                                          setState(() {
+                                            if (_beerAmount > 0.5) _beerAmount -= 0.5;
+                                          });
+                                        },
+                                      ),
+                                      Text("$_beerAmount"),
+                                      IconButton(
+                                        icon: Icon(Icons.add),
+                                        onPressed: () {
+                                          setState(() {
+                                            _beerAmount += 0.5;
+                                          });
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                          ], // children (Column)
+                        ), // Column
+                      ), // Container (소주/맥주 선택)
+
+                      SizedBox(height: 20), // ✅ 하단 여백 추가
+                    ], // children (Column)
+                  ), // Column
+                ), // SingleChildScrollView
+              ), // Expanded
+
+              Container( // ✅ "완료" 버튼
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
                   onPressed: _isFormValid()
-                    ? () {
-                      Navigator.pop(context); // ✅ 조건 충족 시 캘린더 화면으로 이동
-                    } : null, // ✅ 조건 충족 안 되면 버튼 비활성화
+                      ? () {
+                    Navigator.pop(context);
+                  } : null, // ✅ 조건 충족 시 버튼 활성화
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black,
                     disabledBackgroundColor: Colors.grey[500],
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
-                    ),
+                  ), // ElevatedButton 스타일
                   child: Text(
                     "완료",
                     style: TextStyle(
@@ -637,13 +647,14 @@ class _DrinkingRecordScreenState extends State<DrinkingRecordScreen> {
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                       color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+                    ), // TextStyle
+                  ), // Text
+                ), // ElevatedButton
+              ), // Container (완료 버튼)
+
+            ], // children (Column)
+          ), // Column
+        ), // GestureDetector
       ),
     );
   }
