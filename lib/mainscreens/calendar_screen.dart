@@ -34,6 +34,7 @@ class _CalendarScreenState extends State<CalendarScreen>
 
   Widget _buildDrawer() {
     return Drawer(
+      backgroundColor: Colors.white,
       child: Padding(
         padding: const EdgeInsets.only(top: 60.0, left: 20.0),
         child: Column(
@@ -119,7 +120,9 @@ class _CalendarScreenState extends State<CalendarScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       endDrawer: _buildDrawer(),
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -199,6 +202,16 @@ class _CalendarScreenState extends State<CalendarScreen>
                         fontSize: 16,
                         color: Colors.black,
                       ),
+                      weekendTextStyle: TextStyle(
+                        fontFamily: 'NotoSansKR',
+                        fontSize: 16,
+                        color: Colors.black,
+                      ),
+                      outsideTextStyle: TextStyle(
+                        fontFamily: 'NotoSansKR',
+                        fontSize: 16,
+                        color: Colors.grey,
+                      ),
                       todayDecoration: BoxDecoration(
                         color: (_selectedDay == null ||
                             isSameDay(_selectedDay, DateTime.now()))
@@ -230,6 +243,58 @@ class _CalendarScreenState extends State<CalendarScreen>
                         fontFamily: 'NotoSansKR', // 🔥 주말 폰트 적용
                         color: Colors.black,
                       ),
+                    ),
+                    calendarBuilders: CalendarBuilders(
+                      dowBuilder: (context, day) {
+                        if (day.weekday == DateTime.sunday) {
+                          return Center(
+                            child: Text(
+                              '일',
+                              style: TextStyle(
+                                fontFamily: 'NotoSansKR',
+                                color: Colors.red,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          );
+                        } else if (day.weekday == DateTime.saturday) {
+                          return Center(
+                            child: Text(
+                              '토',
+                              style: TextStyle(
+                                fontFamily: 'NotoSansKR',
+                                color: Colors.blue,
+                                fontWeight: FontWeight.bold,
+                              )
+                            )
+                          );
+                        }
+                        return null;
+                      },
+                      defaultBuilder: (context, day, focusedDay) {
+                        final isFuture = day.isAfter(DateTime.now()); // 미래 날짜 확인
+                        final isSunday = day.weekday == DateTime.sunday;
+                        final isSaturday = day.weekday == DateTime.saturday;
+
+                        return Center(
+                          child: Text(
+                            '${day.day}',
+                            style: TextStyle(
+                                fontFamily: 'NotoSansKR',
+                                fontSize: 16,
+                                fontWeight: FontWeight.normal,
+                                color: isFuture
+                                    ? Colors.grey // 미래 날짜 회색
+                                    : isSunday
+                                      ? Colors.red // 일요일 날짜 빨강
+                                      : isSaturday
+                                        ? Colors.blue
+                                        : Colors.black,
+
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ),
