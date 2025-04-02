@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'drinking_record_screen.dart';
-import 'drunkenness_screen.dart';
+import 'DrinkTypeSelection_screen.dart';
 
 class CalendarScreen extends StatefulWidget {
   @override
@@ -53,7 +53,7 @@ class _CalendarScreenState extends State<CalendarScreen>
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => DrunkennessScreen()),
+                  MaterialPageRoute(builder: (context) => DrinkTypeSelectionScreen()),
                 );
               },
               child: Text(
@@ -259,14 +259,14 @@ class _CalendarScreenState extends State<CalendarScreen>
                           );
                         } else if (day.weekday == DateTime.saturday) {
                           return Center(
-                            child: Text(
-                              '토',
-                              style: TextStyle(
-                                fontFamily: 'NotoSansKR',
-                                color: Colors.blue,
-                                fontWeight: FontWeight.bold,
+                              child: Text(
+                                  '토',
+                                  style: TextStyle(
+                                    fontFamily: 'NotoSansKR',
+                                    color: Colors.blue,
+                                    fontWeight: FontWeight.bold,
+                                  )
                               )
-                            )
                           );
                         }
                         return null;
@@ -280,16 +280,16 @@ class _CalendarScreenState extends State<CalendarScreen>
                           child: Text(
                             '${day.day}',
                             style: TextStyle(
-                                fontFamily: 'NotoSansKR',
-                                fontSize: 16,
-                                fontWeight: FontWeight.normal,
-                                color: isFuture
-                                    ? Colors.grey // 미래 날짜 회색
-                                    : isSunday
-                                      ? Colors.red // 일요일 날짜 빨강
-                                      : isSaturday
-                                        ? Colors.blue
-                                        : Colors.black,
+                              fontFamily: 'NotoSansKR',
+                              fontSize: 16,
+                              fontWeight: FontWeight.normal,
+                              color: isFuture
+                                  ? Colors.grey // 미래 날짜 회색
+                                  : isSunday
+                                  ? Colors.red // 일요일 날짜 빨강
+                                  : isSaturday
+                                  ? Colors.blue
+                                  : Colors.black,
 
                             ),
                           ),
