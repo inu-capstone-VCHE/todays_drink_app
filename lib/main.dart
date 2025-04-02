@@ -1,17 +1,13 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
+import 'settingscreen/setting_screen.dart';
+
+/*
+import 'dart:async';
 import 'package:intl/date_symbol_data_local.dart'; // ✅ 한글 날짜 포맷 초기화용 패키지 추가
 import 'launchscreen/start_screen.dart';
 import 'launchscreen/start_screen2.dart';
 import 'mainscreens/calendar_screen.dart';
 import 'loginscreen/loginDefault_screen.dart';
-
-/*
-void main() {
-  runApp(MyApp());
-}
- */
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // ✅ 비동기 초기화 보장
@@ -51,5 +47,23 @@ class _StartScreenWithDelayState extends State<StartScreenWithDelay> {
   @override
   Widget build(BuildContext context) {
     return StartScreen(); // ✅ 시작 화면 먼저 표시
+  }
+}
+*/
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      title: 'Setting Screen Test',
+      debugShowCheckedModeBanner: false,
+      home: SettingScreen(),
+    );
   }
 }
