@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'settingscreen/setting_screen.dart';
+import 'firstloginscreens//inputinformation_screen.dart';
 
 /*
 import 'dart:async';
@@ -63,7 +64,7 @@ class MyApp extends StatelessWidget {
     return const MaterialApp(
       title: 'Setting Screen Test',
       debugShowCheckedModeBanner: false,
-      home: SettingScreen(),
+      home: InputInformationScreen(),
     );
   }
 }
