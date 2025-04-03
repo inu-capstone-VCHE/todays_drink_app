@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'drinking_record_screen.dart';
-import 'DrinkTypeSelection_screen.dart';
+import 'drink_type_selection.dart';
+import 'monthly_report_screen.dart';
 
 class CalendarScreen extends StatefulWidget {
   @override
@@ -153,7 +154,12 @@ class _CalendarScreenState extends State<CalendarScreen>
         centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.bar_chart_rounded),
-          onPressed: () {},
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => MonthlyReportScreen()),
+            );
+          },
         ),
         actions: [
           Builder(
