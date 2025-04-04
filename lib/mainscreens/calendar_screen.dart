@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'drinking_record_screen.dart';
-import 'drunkenness_screen.dart';
+import 'drink_type_selection.dart';
+import 'monthly_report_screen.dart';
+import 'package:todays_drink/drinking_record.dart';
+import 'dart:math';
 
 class CalendarScreen extends StatefulWidget {
   @override
@@ -17,6 +20,8 @@ class _CalendarScreenState extends State<CalendarScreen>
   late Animation<double> _slideAnimation;
   double _calendarHeight = 600;
   double _recordHeight = 230;
+
+  Map<String, List<DrinkingRecord>> drinkingRecords = {};
 
   @override
   void initState() {
@@ -53,7 +58,7 @@ class _CalendarScreenState extends State<CalendarScreen>
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => DrunkennessScreen()),
+                  MaterialPageRoute(builder: (context) => DrinkTypeSelectionScreen()),
                 );
               },
               child: Text(
@@ -81,6 +86,40 @@ class _CalendarScreenState extends State<CalendarScreen>
         ),
       ),
     );
+  }
+
+  Widget _buildDrinkItem(String asset, String text) {
+    return Row(
+      children: [
+        Image.asset(asset, width: 36, height: 36,),
+        SizedBox(width: 8),
+        Text(
+          text,
+          style: TextStyle(
+            fontFamily: 'NotoSansKR',
+            fontSize: 16,
+            color: Colors.grey[800],
+          ),
+        ),
+      ],
+    );
+  }
+
+  double _getTextWidth(BuildContext context, String text, double fontSize, FontWeight fontWeight) {
+    final TextPainter textPainter = TextPainter(
+      text: TextSpan(
+        text: text,
+        style: TextStyle(
+          fontSize: fontSize,
+          fontWeight: fontWeight,
+          fontFamily: 'NotoSansKR',
+        ),
+      ),
+      maxLines: 1,
+      textDirection: TextDirection.ltr,
+    )..layout();
+
+    return textPainter.width;
   }
 
   void _toggleRecord(bool show) {
@@ -153,7 +192,12 @@ class _CalendarScreenState extends State<CalendarScreen>
         centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.bar_chart_rounded),
-          onPressed: () {},
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => MonthlyReportScreen()),
+            );
+          },
         ),
         actions: [
           Builder(
@@ -259,14 +303,14 @@ class _CalendarScreenState extends State<CalendarScreen>
                           );
                         } else if (day.weekday == DateTime.saturday) {
                           return Center(
-                            child: Text(
-                              '토',
-                              style: TextStyle(
-                                fontFamily: 'NotoSansKR',
-                                color: Colors.blue,
-                                fontWeight: FontWeight.bold,
+                              child: Text(
+                                  '토',
+                                  style: TextStyle(
+                                    fontFamily: 'NotoSansKR',
+                                    color: Colors.blue,
+                                    fontWeight: FontWeight.bold,
+                                  )
                               )
-                            )
                           );
                         }
                         return null;
@@ -280,20 +324,61 @@ class _CalendarScreenState extends State<CalendarScreen>
                           child: Text(
                             '${day.day}',
                             style: TextStyle(
-                                fontFamily: 'NotoSansKR',
-                                fontSize: 16,
-                                fontWeight: FontWeight.normal,
-                                color: isFuture
-                                    ? Colors.grey // 미래 날짜 회색
-                                    : isSunday
-                                      ? Colors.red // 일요일 날짜 빨강
-                                      : isSaturday
-                                        ? Colors.blue
-                                        : Colors.black,
+                              fontFamily: 'NotoSansKR',
+                              fontSize: 16,
+                              fontWeight: FontWeight.normal,
+                              color: isFuture
+                                  ? Colors.grey // 미래 날짜 회색
+                                  : isSunday
+                                  ? Colors.red // 일요일 날짜 빨강
+                                  : isSaturday
+                                  ? Colors.blue
+                                  : Colors.black,
 
                             ),
                           ),
                         );
+                      },
+                      markerBuilder: (context, day, events) {
+                        String dateKey = "${day.year}-${day.month}-${day.day}";
+
+                        if (drinkingRecords.containsKey(dateKey)) {
+                          final record = drinkingRecords[dateKey]!;
+
+                          String assetPath;
+
+                          final drankSoju = record.any((r) => r.sojuAmount > 0);
+                          final drankBeer = record.any((r) => r.beerAmount > 0);
+
+
+                          if (drankSoju && drankBeer) {
+                            // 소주 + 맥주 둘 다 마셨을 때 랜덤 (고정된 랜덤!)
+                            final seed = day.year * 10000 + day.month * 100 + day.day;
+                            final isSoju = Random(seed).nextBool();
+                            assetPath = isSoju ? "assets/soju.png" : "assets/beer.png";
+                          } else if (drankSoju) {
+                            assetPath = "assets/soju.png";
+                          } else if (drankBeer) {
+                            assetPath = "assets/beer.png";
+                          } else {
+                            return null; // 둘 다 안 마셨으면 표시 안 함
+                          }
+
+                          return Center(  // <-- ✅ Center로 바꿔 날짜 중앙으로 병 배치
+                            child: Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.transparent,
+                              ),
+                              child: Image.asset(
+                                assetPath,
+                                width: 32,  // ✅ 아이콘 크기 조정으로 숫자를 덮게 함
+                                height: 32,
+                              ),
+                            ),
+                          );
+                        }
+                        return null;
                       },
                     ),
                   ),
@@ -303,75 +388,141 @@ class _CalendarScreenState extends State<CalendarScreen>
             if (_showRecord)
               AnimatedBuilder(
                 animation: _slideAnimation,
-                builder: (context, child) {
-                  return Positioned(
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    height: _recordHeight,
-                    child: Transform.translate(
-                      offset: Offset(
-                          0, _recordHeight * (1 - _slideAnimation.value)),
-                      child: Container(
-                        width: double.infinity,
-                        padding:
-                        EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                        color: Colors.grey[200],
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            SizedBox(height: 5),
-                            Center(
-                              child: Container(
-                                width: 60,
-                                height: 6,
-                                decoration: BoxDecoration(
-                                  color: Colors.grey,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: 15),
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                "${_selectedDay!.year}.${_selectedDay!.month}.${_selectedDay!.day}",
-                                style: TextStyle(
-                                  fontFamily: 'NotoSansKR', // 🔥 음주 기록 날짜 폰트 적용
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: Center(
-                                child: Text(
-                                  "작성한 기록이 아직 없어!\n음주 기록을 작성해볼까?",
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontFamily: 'NotoSansKR', // 🔥 메시지 폰트 적용
+                  builder: (context, child) {
+                    final dateKey = "${_selectedDay!.year}-${_selectedDay!.month}-${_selectedDay!.day}";
+                    final recordList = drinkingRecords[dateKey];
+
+                    return Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      height: _recordHeight,
+                      child: Transform.translate(
+                        offset: Offset(0, _recordHeight * (1 - _slideAnimation.value)),
+                        child: Container(
+                          color: Colors.grey[200],
+                          padding: EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Center(
+                                child: Container(
+                                  width: 60,
+                                  height: 6,
+                                  decoration: BoxDecoration(
                                     color: Colors.grey,
-                                    fontSize: 12,
+                                    borderRadius: BorderRadius.circular(10),
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
+                              SizedBox(height: 12),
+                              Text(
+                                "${_selectedDay!.year}.${_selectedDay!.month}.${_selectedDay!.day}",
+                                style: TextStyle(
+                                  fontFamily: 'NotoSansKR',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(height: 12),
+
+                              Expanded(
+                                child: recordList != null && recordList.isNotEmpty
+                                    ? ListView.builder(
+                                  itemCount: recordList.length,
+                                  padding: EdgeInsets.only(bottom: 16),
+                                  itemBuilder: (context, index) {
+                                    final record = recordList[index];
+                                    return Container(
+                                      margin: EdgeInsets.only(top: 10),
+                                      padding: EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Stack(
+                                            alignment: Alignment.bottomLeft,
+                                            children: [
+                                              Container(
+                                                height: 8,
+                                                width: _getTextWidth(context, record.title, 16, FontWeight.w700),
+                                                color: Color(0xFFF2D027),
+                                                margin: EdgeInsets.only(bottom: 0),
+                                              ),
+                                              Text(
+                                                record.title,
+                                                style: TextStyle(
+                                                  fontFamily: 'NotoSansKR',
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: Colors.black,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          SizedBox(height: 15),
+                                          Row(
+                                            children: [
+                                              if (record.sojuUnit != null)
+                                                _buildDrinkItem("assets/soju.png", "${record.sojuAmount}${record.sojuUnit}"),
+                                              if (record.sojuUnit != null && record.beerUnit != null)
+                                                SizedBox(width: 20),
+                                              if (record.beerUnit != null)
+                                                _buildDrinkItem(
+                                                    "assets/beer.png",
+                                                    record.beerUnit == "500ml"
+                                                    ? "${(record.beerAmount * 500).toInt()}ml"
+                                                    : "${record.beerAmount}${record.beerUnit}"),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                )
+                                    : Center(
+                                  child: Text(
+                                    "작성한 기록이 아직 없어!\n음주 기록을 작성해볼까?",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontFamily: 'NotoSansKR',
+                                      color: Colors.grey,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
               ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
+        onPressed: () async {
+          final result = await Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => DrinkingRecordScreen()),
+            MaterialPageRoute(builder: (_) => DrinkingRecordScreen(
+              selectedDate: _selectedDay ?? DateTime.now(),
+            )),
           );
+
+          if (result != null && result is DrinkingRecord) {
+            String dateKey = "${result.date.year}-${result.date.month}-${result.date.day}";
+            setState(() {
+              if (!drinkingRecords.containsKey(dateKey)) {
+                drinkingRecords[dateKey] = [];
+              }
+              drinkingRecords[dateKey]!.add(result);
+            });
+          }
         },
         backgroundColor: Colors.black,
         child: Icon(Icons.add, color: Colors.white),

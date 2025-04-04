@@ -30,6 +30,8 @@ flutter:
     - assets/soju.png
     - assets/drinks.png
     - assets/seal.png
+    - assets/soup.png
+    - assets/running.png
 
   fonts:
     - family: NotoSansKR

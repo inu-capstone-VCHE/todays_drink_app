@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: '오늘의 한 잔',
       debugShowCheckedModeBanner: false,
-      home: StartScreenWithDelay(), // ✅ 시작 화면 유지
+      home: CalendarScreen(), // ✅ 시작 화면 유지
     );
   }
 }

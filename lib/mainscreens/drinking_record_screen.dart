@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:todays_drink/drinking_record.dart';
 
 class DrinkingRecordScreen extends StatefulWidget {
+  final DateTime selectedDate;
+
+  DrinkingRecordScreen({required this.selectedDate});
+
   @override
   _DrinkingRecordScreenState createState() => _DrinkingRecordScreenState();
 }
@@ -77,7 +82,7 @@ class _DrinkingRecordScreenState extends State<DrinkingRecordScreen> {
             ElevatedButton(
               onPressed: () {
                 Navigator.pop(context); // 다이얼로그 닫기
-                Navigator.pop(context); // 캘린더 화면으로 이동
+                Navigator.pop(context); // 음주 기록 화면 닫기
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.black,
@@ -633,8 +638,21 @@ class _DrinkingRecordScreenState extends State<DrinkingRecordScreen> {
                 child: ElevatedButton(
                   onPressed: _isFormValid()
                       ? () {
-                    Navigator.pop(context);
-                  } : null, // ✅ 조건 충족 시 버튼 활성화
+                          DateTime dateKey = DateTime(
+                            widget.selectedDate.year,
+                            widget.selectedDate.month,
+                            widget.selectedDate.day
+                          );
+                          Navigator.pop(context, DrinkingRecord(
+                            date: dateKey,
+                            title: _textController.text,
+                            sojuAmount: _isSojuSelected ? _sojuAmount : 0,
+                            sojuUnit: _selectedSojuUnit,
+                            beerAmount: _isBeerSelected ? _beerAmount : 0,
+                            beerUnit: _selectedBeerUnit,
+                          ));
+                      }
+                    : null, // ✅ 조건 충족 시 버튼 활성화
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black,
                     disabledBackgroundColor: Colors.grey[500],
