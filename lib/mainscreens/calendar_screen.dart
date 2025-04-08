@@ -5,6 +5,9 @@ import 'drink_type_selection.dart';
 import 'monthly_report_screen.dart';
 import 'package:todays_drink/drinking_record.dart';
 import 'dart:math';
+import 'package:todays_drink/settingscreen/setting_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:todays_drink/providers/profile_provider.dart';
 
 class CalendarScreen extends StatefulWidget {
   @override
@@ -38,22 +41,50 @@ class _CalendarScreenState extends State<CalendarScreen>
   }
 
   Widget _buildDrawer() {
+    final profile = Provider.of<ProfileProvider>(context);
+
     return Drawer(
       backgroundColor: Colors.white,
       child: Padding(
-        padding: const EdgeInsets.only(top: 60.0, left: 20.0),
+        padding: const EdgeInsets.only(top: 60.0, left: 20.0, right: 20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "닉네임",
-              style: TextStyle(
-                fontFamily: 'NotoSansKR',
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const SettingScreen()),
+                );
+              },
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 28,
+                    backgroundColor: const Color(0xFFEFEFEF),
+                    backgroundImage: profile.imageFile != null ? FileImage(profile.imageFile!) : null,
+                    child: profile.imageFile == null
+                        ? const Icon(Icons.pets, size: 30, color: Colors.grey)
+                        : null,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      profile.nickname,
+                      style: const TextStyle(
+                        fontFamily: 'NotoSansKR',
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const Icon(Icons.chevron_right),
+                ],
               ),
             ),
-            SizedBox(height: 40),
+            const SizedBox(height: 40),
+
             GestureDetector(
               onTap: () {
                 Navigator.push(
@@ -61,24 +92,11 @@ class _CalendarScreenState extends State<CalendarScreen>
                   MaterialPageRoute(builder: (context) => DrinkTypeSelectionScreen()),
                 );
               },
-              child: Text(
+              child: const Text(
                 "취기 측정 모드",
                 style: TextStyle(
-                    fontFamily: 'NotoSansKR',
-                    fontSize: 18
-                ),
-              ),
-            ),
-            SizedBox(height: 20),
-            GestureDetector(
-              onTap: () {
-                // TODO: 설정 기능 추가
-              },
-              child: Text(
-                "설정",
-                style: TextStyle(
-                    fontFamily: 'NotoSansKR',
-                    fontSize: 18
+                  fontFamily: 'NotoSansKR',
+                  fontSize: 18,
                 ),
               ),
             ),

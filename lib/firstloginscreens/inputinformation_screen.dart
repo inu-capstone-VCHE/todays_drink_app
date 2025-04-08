@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:todays_drink/firstloginscreens/alcoholTolerance_screen.dart';
 
 class InputInformationScreen extends StatefulWidget {
   const InputInformationScreen({super.key});
@@ -37,41 +38,79 @@ class _InputInformationScreenState extends State<InputInformationScreen> {
           children: [
             const SizedBox(height: 16),
             const Text('당신의 성별은?',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                style: TextStyle(
+                    fontFamily: 'NotoSansKR',
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800
+                )
+            ),
             const SizedBox(height: 16),
             Row(
-              children: ['남자', '여자'].map((String value) {
-                return Expanded(
+              children: [
+                Expanded(
                   child: GestureDetector(
                     onTap: () {
                       setState(() {
-                        gender = value;
+                        gender = '남자';
                         showHeight = true;
                       });
                     },
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 12),
-                      margin: const EdgeInsets.symmetric(horizontal: 2), // ⚠️ 여기를 수정하면 성별 버튼 크기와 간격 조정 가능
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: gender == value ? const Color(0xFFF2D027) : Colors.grey,
+                          color: gender == '남자' ? const Color(0xFFF2D027) : Colors.grey,
                           width: 1.5,
                         ),
                       ),
                       child: Center(
                         child: Text(
-                          value,
+                          '남자',
                           style: TextStyle(
-                            color: gender == value ? const Color(0xFFF2D027) : Colors.black,
+                            fontFamily: 'NotoSansKR',
+                            color: Colors.black,
                             fontSize: 16,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
                     ),
                   ),
-                );
-              }).toList(),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        gender = '여자';
+                        showHeight = true;
+                      });
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: gender == '여자' ? const Color(0xFFF2D027) : Colors.grey,
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Center(
+                        child: Text(
+                          '여자',
+                          style: TextStyle(
+                            fontFamily: 'NotoSansKR',
+                            color: Colors.black,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 24),
             AnimatedOpacity(
@@ -81,17 +120,22 @@ class _InputInformationScreenState extends State<InputInformationScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const Text('당신의 키는?',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
+                      style: TextStyle(
+                          fontFamily: 'NotoSansKR',
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800)),
+                  const SizedBox(height: 16),
                   TextField(
                     controller: heightController,
-                    textAlign: TextAlign.right, // ✅ 입력 텍스트 오른쪽 정렬
+                    textAlign: TextAlign.right,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: isHeightEntered ? const Color(0xFFF2D027) : Colors.grey),
+                        borderSide: BorderSide(
+                          color: isHeightEntered ? const Color(0xFFF2D027) : Colors.grey,
+                        ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
@@ -116,17 +160,24 @@ class _InputInformationScreenState extends State<InputInformationScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const Text('당신의 몸무게는?',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
+                      style: TextStyle(
+                          fontFamily: 'NotoSansKR',
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800
+                      )
+                  ),
+                  const SizedBox(height: 16),
                   TextField(
                     controller: weightController,
-                    textAlign: TextAlign.right, // ✅ 입력 텍스트 오른쪽 정렬
+                    textAlign: TextAlign.right,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: isWeightEntered ? const Color(0xFFF2D027) : Colors.grey),
+                        borderSide: BorderSide(
+                          color: isWeightEntered ? const Color(0xFFF2D027) : Colors.grey,
+                        ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
@@ -146,12 +197,23 @@ class _InputInformationScreenState extends State<InputInformationScreen> {
               height: 50,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF2E7B8C),
+                  backgroundColor: const Color(0xFF2E7B8C),
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Text('계속하기', style: TextStyle(fontSize: 16)),
-                onPressed: () {},
+                child: const Text('계속하기',
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontFamily: "NotoSansKR",
+                        fontWeight: FontWeight.w700
+                    )
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const AlcoholAmountScreen()),
+                  );
+                },
               ),
             ),
             const SizedBox(height: 24),

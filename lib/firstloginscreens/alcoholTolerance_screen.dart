@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:todays_drink/firstloginscreens/pledge_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:todays_drink/providers/profile_provider.dart';
 
 class AlcoholAmountScreen extends StatefulWidget {
   const AlcoholAmountScreen({super.key});
@@ -30,12 +33,21 @@ class _AlcoholAmountScreenState extends State<AlcoholAmountScreen> {
           children: [
             const Text(
               '당신의 주량은?',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  fontFamily: 'NotoSansKR',
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800)
+              ,
             ),
             const SizedBox(height: 8),
             const Text(
               '주로 마시는 주종을 선택한 후 주량을 알려주세요.',
-              style: TextStyle(fontSize: 14, color: Colors.grey),
+              style: TextStyle(
+                  fontFamily: "NotoSansKR",
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.grey
+              ),
             ),
             const SizedBox(height: 24),
             Row(
@@ -45,10 +57,11 @@ class _AlcoholAmountScreenState extends State<AlcoholAmountScreen> {
                     onTap: () {
                       setState(() {
                         drinkType = type;
+                        amount = 0.0;
                       });
                     },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
                       margin: const EdgeInsets.symmetric(horizontal: 4),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(8),
@@ -63,9 +76,9 @@ class _AlcoholAmountScreenState extends State<AlcoholAmountScreen> {
                         child: Text(
                           type,
                           style: TextStyle(
-                            color: drinkType == type
-                                ? const Color(0xFFF2D027)
-                                : Colors.black,
+                            fontFamily: "NotoSansKR",
+                            color: Colors.black,
+                            fontWeight: FontWeight.w600,
                             fontSize: 16,
                           ),
                         ),
@@ -80,8 +93,8 @@ class _AlcoholAmountScreenState extends State<AlcoholAmountScreen> {
               Text(
                 '${amount.toStringAsFixed(1)}병',
                 style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               Slider(
@@ -116,8 +129,24 @@ class _AlcoholAmountScreenState extends State<AlcoholAmountScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                onPressed: drinkType != null ? () {} : null,
-                child: const Text('계속하기', style: TextStyle(fontSize: 16)),
+                onPressed: drinkType != null
+                    ? () {
+                  Provider.of<ProfileProvider>(context, listen: false)
+                      .updateDrinkingInfo(drinkType!, amount);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const PledgeScreen()),
+                  );
+                }
+                    : null,
+
+                child: const Text('계속하기',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontFamily: "NotoSansKR",
+                      fontWeight: FontWeight.w700
+                    )
+                ),
               ),
             ),
             const SizedBox(height: 24),
