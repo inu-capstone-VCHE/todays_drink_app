@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import '../launchscreen/start_screen2.dart'; // ✅ 회원가입 완료 후 이동할 화면 import
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import '../launchscreen/start_screen2.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({Key? key}) : super(key: key);
@@ -9,8 +11,27 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
-  bool _passwordVisible = false; // 비밀번호 보기 여부
-  bool _confirmPasswordVisible = false; // 비밀번호 확인 보기 여부
+  bool _passwordVisible = false;
+  bool _confirmPasswordVisible = false;
+
+  // 🔥 TextEditingControllers 추가
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _birthController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _nicknameController = TextEditingController();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _birthController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    _nicknameController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,65 +42,55 @@ class _SignupScreenState extends State<SignupScreen> {
         title: const Text(
           "회원가입",
           style: TextStyle(
-            fontWeight: FontWeight.bold, // ✅ 볼드체 적용
-            fontSize: 20, // ✅ 기본 폰트 크기 유지
-            color: Colors.black, // ✅ 글자색 유지
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+            color: Colors.black,
           ),
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context), // 🔙 뒤로 가기 기능
+          onPressed: () => Navigator.pop(context),
         ),
-        elevation: 0, // 그림자 제거
-        backgroundColor: Colors.white, // ✅ 배경 흰색 유지
+        elevation: 0,
+        backgroundColor: Colors.white,
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 20), // 🔥 상단 여백 추가
+            const SizedBox(height: 20),
 
-            // ✅ 이름 입력 필드
-            buildInputField(Icons.person, "이름"),
+            buildInputField(Icons.person, "이름", _nameController),
+            buildInputField(Icons.calendar_today, "생년월일", _birthController),
+            buildInputField(Icons.email, "이메일", _emailController),
 
-            // ✅ 생년월일 입력 필드
-            buildInputField(Icons.calendar_today, "생년월일"),
-
-            // ✅ 이메일 입력 필드
-            buildInputField(Icons.email, "이메일"),
-
-            // ✅ 비밀번호 입력 필드
             buildPasswordField("비밀번호", _passwordVisible, (value) {
               setState(() {
                 _passwordVisible = !_passwordVisible;
               });
-            }),
+            }, _passwordController),
 
-            // ✅ 비밀번호 확인 입력 필드
             buildPasswordField("비밀번호 확인", _confirmPasswordVisible, (value) {
               setState(() {
                 _confirmPasswordVisible = !_confirmPasswordVisible;
               });
-            }),
+            }, _confirmPasswordController),
 
-            // ✅ 닉네임 입력 필드 + 중복 확인 버튼 (크기 완벽하게 맞춤)
             Row(
               children: [
                 Expanded(
-                  flex: 2, // ✅ 닉네임 필드 비율 설정
-                  child: buildInputField(Icons.person, "닉네임"),
+                  flex: 2,
+                  child: buildInputField(Icons.person, "닉네임", _nicknameController),
                 ),
                 const SizedBox(width: 20),
                 SizedBox(
-                  width: 110, // ✅ 버튼 크기 고정
-                  height: 30, // ✅ 입력 필드와 동일한 높이
+                  width: 110,
+                  height: 30,
                   child: ElevatedButton(
-                    onPressed: () {
-                      // TODO: 닉네임 중복 확인 기능 추가
-                    },
+                    onPressed: () {},
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFB0C4DE), // 버튼 색상 (연한 청록색)
+                      backgroundColor: const Color(0xFFB0C4DE),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -93,18 +104,17 @@ class _SignupScreenState extends State<SignupScreen> {
               ],
             ),
 
-            const Spacer(), // 🔥 나머지 공간을 모두 차지하도록 추가
+            const Spacer(),
 
-            // ✅ 회원가입 완료 버튼 (맨 아래 배치 + 팝업 + 화면 이동)
             SizedBox(
               width: screenWidth,
               height: 50,
               child: ElevatedButton(
-                onPressed: () {
-                  _showSignupSuccessDialog(context); // ✅ 회원가입 성공 팝업 띄우기
+                onPressed: () async {
+                  await signupUser();
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2D6876), // 버튼 색상 (진한 청록색)
+                  backgroundColor: const Color(0xFF2D6876),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
                 child: const Text(
@@ -113,15 +123,43 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 20), // 🔥 버튼 아래 여백 추가
+            const SizedBox(height: 20),
           ],
         ),
       ),
-      backgroundColor: Colors.white, // ✅ 배경 흰색 유지
+      backgroundColor: Colors.white,
     );
   }
 
-  // 🔥 회원가입 성공 팝업 + StartScreen2 이동
+  Future<void> signupUser() async {
+    final url = Uri.parse('http://54.180.90.1:8080/v1/user/join');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'name': _nameController.text,
+          'nickname': _nicknameController.text,
+          'email': _emailController.text,
+          'password': _passwordController.text,
+          'birth': int.tryParse(_birthController.text) ?? 0,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        _showSignupSuccessDialog(context);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('회원가입 실패: ${response.body}')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('에러 발생: $e')),
+      );
+    }
+  }
+
   void _showSignupSuccessDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -132,8 +170,8 @@ class _SignupScreenState extends State<SignupScreen> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // ✅ 팝업 닫기
-                Navigator.pushReplacement( // ✅ StartScreen2로 이동
+                Navigator.of(context).pop();
+                Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => const StartScreen2()),
                 );
@@ -146,27 +184,27 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  // 🔥 일반 입력 필드 (아이콘 + 텍스트, 얇은 실선 테두리 추가)
-  Widget buildInputField(IconData icon, String hintText) {
+  Widget buildInputField(IconData icon, String hintText, TextEditingController controller) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: TextField(
+        controller: controller,
         decoration: InputDecoration(
           hintText: hintText,
           prefixIcon: Icon(icon, color: Colors.grey),
           filled: true,
-          fillColor: Colors.white, // ✅ 배경 흰색
+          fillColor: Colors.white,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Colors.grey[300]!, width: 1), // ✅ 얇은 실선 테두리 추가
+            borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Colors.grey[300]!, width: 1), // ✅ 기본 테두리 스타일
+            borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Colors.grey[500]!, width: 1.5), // ✅ 포커스 시 조금 더 진한 색
+            borderSide: BorderSide(color: Colors.grey[500]!, width: 1.5),
           ),
           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
         ),
@@ -174,11 +212,11 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  // 🔥 비밀번호 입력 필드 (비밀번호 보기 기능 포함, 얇은 실선 테두리 추가)
-  Widget buildPasswordField(String hintText, bool isVisible, Function(bool) toggleVisibility) {
+  Widget buildPasswordField(String hintText, bool isVisible, Function(bool) toggleVisibility, TextEditingController controller) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: TextField(
+        controller: controller,
         obscureText: !isVisible,
         decoration: InputDecoration(
           hintText: hintText,
@@ -188,18 +226,18 @@ class _SignupScreenState extends State<SignupScreen> {
             onPressed: () => toggleVisibility(!isVisible),
           ),
           filled: true,
-          fillColor: Colors.white, // ✅ 배경 흰색
+          fillColor: Colors.white,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Colors.grey[300]!, width: 1), // ✅ 얇은 실선 테두리 추가
+            borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Colors.grey[300]!, width: 1), // ✅ 기본 테두리 스타일
+            borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Colors.grey[500]!, width: 1.5), // ✅ 포커스 시 조금 더 진한 색
+            borderSide: BorderSide(color: Colors.grey[500]!, width: 1.5),
           ),
           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
         ),

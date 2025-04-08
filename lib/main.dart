@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'package:todays_drink/firstloginscreens/inputinformation_screen.dart';
+import 'package:todays_drink/loginscreen/signup_screen.dart';
 import 'package:todays_drink/mainscreens/calendar_screen.dart';
 import 'package:todays_drink/providers/profile_provider.dart';
 
@@ -27,7 +28,7 @@ class MyApp extends StatelessWidget {
     return const MaterialApp(
       title: '오늘의 한 잔',
       debugShowCheckedModeBanner: false,
-      home: InputInformationScreen(), // ✅ 캘린더 스크린으로 시작
+      home: SignupScreen(), // ✅ 캘린더 스크린으로 시작
     );
   }
 }
