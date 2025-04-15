@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 
 class ProfileProvider with ChangeNotifier {
-  String _nickname = '정해인';
+  String _nickname = '닉네임';
   File? _imageFile;
 
   // ✅ 추가: 주량 정보와 다짐 정보

@@ -19,6 +19,8 @@ class _InputInformationScreenState extends State<InputInformationScreen> {
   bool get isHeightEntered => heightController.text.isNotEmpty;
   bool get isWeightEntered => weightController.text.isNotEmpty;
 
+  bool get isAllInfoEntered => gender != null && isHeightEntered && isWeightEntered;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -197,23 +199,28 @@ class _InputInformationScreenState extends State<InputInformationScreen> {
               height: 50,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2E7B8C),
+                  backgroundColor: (gender != null && isHeightEntered && isWeightEntered)
+                      ? const Color(0xFF2E7B8C)
+                      : Colors.grey[300],
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Text('계속하기',
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontFamily: "NotoSansKR",
-                        fontWeight: FontWeight.w700
-                    )
-                ),
-                onPressed: () {
+                onPressed: (gender != null && isHeightEntered && isWeightEntered)
+                    ? () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const AlcoholAmountScreen()),
                   );
-                },
+                }
+                    : null,
+                child: const Text(
+                  '계속하기',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontFamily: "NotoSansKR",
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 24),

@@ -173,6 +173,12 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.close, color: Colors.black),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ],
       ),
       body: Stack(
         children: [
