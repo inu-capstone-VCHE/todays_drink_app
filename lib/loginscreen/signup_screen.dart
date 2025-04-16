@@ -132,7 +132,7 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   Future<void> signupUser() async {
-    final url = Uri.parse('http://54.180.90.1:8080/v1/user/join');
+    final url = Uri.parse('http://54.180.90.1:8080/user/join');
     try {
       final response = await http.post(
         url,
