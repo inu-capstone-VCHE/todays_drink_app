@@ -72,7 +72,7 @@ class DrunkennessScreen extends StatefulWidget {
 
 class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
-  int drunkennessLevel = 1;
+  int drunkennessLevel = 4;
 
   late DrunkennessStageData stage;
   late String _randomMessage;

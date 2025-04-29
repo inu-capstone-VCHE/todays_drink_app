@@ -48,7 +48,7 @@ class DrinkTypeSelectionScreen extends StatelessWidget {
                       );
                     },
                   ),
-                  SizedBox(width: 24),
+                  SizedBox(width: 10),
                   _drinkButton(
                     context,
                     image: 'assets/beer.png',
