@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../loginscreen/loginDefault_screen.dart'; // ✅ 로그인 화면 import
-import '../loginscreen/signup_screen.dart';     // ✅ 회원가입 화면 import
+import 'package:todays_drink/loginscreen/loginDefault_screen.dart'; // ✅ 로그인 화면 import
+import 'package:todays_drink/loginscreen/signup_screen.dart';     // ✅ 회원가입 화면 import
 
 class StartScreen2 extends StatelessWidget {
   const StartScreen2({Key? key}) : super(key: key);

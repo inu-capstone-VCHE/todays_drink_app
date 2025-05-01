@@ -14,7 +14,6 @@ class _SignupScreenState extends State<SignupScreen> {
   bool _passwordVisible = false;
   bool _confirmPasswordVisible = false;
 
-  // 🔥 TextEditingControllers 추가
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _birthController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -48,12 +47,13 @@ class _SignupScreenState extends State<SignupScreen> {
           ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
         elevation: 0,
         backgroundColor: Colors.white,
       ),
+      backgroundColor: Colors.white,
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: Column(
@@ -61,48 +61,18 @@ class _SignupScreenState extends State<SignupScreen> {
           children: [
             const SizedBox(height: 20),
 
-            buildInputField(Icons.person, "이름", _nameController),
-            buildInputField(Icons.calendar_today, "생년월일", _birthController),
-            buildInputField(Icons.email, "이메일", _emailController),
+            buildTextField(hint: "이름", icon: Icons.person, controller: _nameController),
+            buildTextField(hint: "생년월일", icon: Icons.calendar_today, controller: _birthController),
+            buildTextField(hint: "이메일", icon: Icons.email, controller: _emailController),
 
-            buildPasswordField("비밀번호", _passwordVisible, (value) {
-              setState(() {
-                _passwordVisible = !_passwordVisible;
-              });
-            }, _passwordController),
+            buildPasswordField(hint: "비밀번호", isVisible: _passwordVisible, controller: _passwordController, toggle: () {
+              setState(() => _passwordVisible = !_passwordVisible);
+            }),
+            buildPasswordField(hint: "비밀번호 확인", isVisible: _confirmPasswordVisible, controller: _confirmPasswordController, toggle: () {
+              setState(() => _confirmPasswordVisible = !_confirmPasswordVisible);
+            }),
 
-            buildPasswordField("비밀번호 확인", _confirmPasswordVisible, (value) {
-              setState(() {
-                _confirmPasswordVisible = !_confirmPasswordVisible;
-              });
-            }, _confirmPasswordController),
-
-            Row(
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: buildInputField(Icons.person, "닉네임", _nicknameController),
-                ),
-                const SizedBox(width: 20),
-                SizedBox(
-                  width: 110,
-                  height: 30,
-                  child: ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFB0C4DE),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: const Text(
-                      "중복 확인",
-                      style: TextStyle(fontSize: 14, color: Colors.white),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            buildTextField(hint: "닉네임", icon: Icons.person, controller: _nicknameController),
 
             const Spacer(),
 
@@ -110,9 +80,7 @@ class _SignupScreenState extends State<SignupScreen> {
               width: screenWidth,
               height: 50,
               child: ElevatedButton(
-                onPressed: () async {
-                  await signupUser();
-                },
+                onPressed: signupUser,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2D6876),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -127,7 +95,41 @@ class _SignupScreenState extends State<SignupScreen> {
           ],
         ),
       ),
-      backgroundColor: Colors.white,
+    );
+  }
+
+  Widget buildTextField({required String hint, required IconData icon, required TextEditingController controller}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20.0),
+      child: TextField(
+        controller: controller,
+        decoration: InputDecoration(
+          hintText: hint,
+          prefixIcon: Icon(icon),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        ),
+      ),
+    );
+  }
+
+  Widget buildPasswordField({required String hint, required bool isVisible, required TextEditingController controller, required VoidCallback toggle}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20.0),
+      child: TextField(
+        controller: controller,
+        obscureText: !isVisible,
+        decoration: InputDecoration(
+          hintText: hint,
+          prefixIcon: const Icon(Icons.lock),
+          suffixIcon: IconButton(
+            icon: Icon(isVisible ? Icons.visibility : Icons.visibility_off),
+            onPressed: toggle,
+          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        ),
+      ),
     );
   }
 
@@ -165,6 +167,7 @@ class _SignupScreenState extends State<SignupScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          backgroundColor: Colors.white,
           title: const Text("회원가입 성공!🎉🎉"),
           content: const Text("회원가입이 완료되었습니다."),
           actions: [
@@ -181,67 +184,6 @@ class _SignupScreenState extends State<SignupScreen> {
           ],
         );
       },
-    );
-  }
-
-  Widget buildInputField(IconData icon, String hintText, TextEditingController controller) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
-      child: TextField(
-        controller: controller,
-        decoration: InputDecoration(
-          hintText: hintText,
-          prefixIcon: Icon(icon, color: Colors.grey),
-          filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Colors.grey[500]!, width: 1.5),
-          ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-        ),
-      ),
-    );
-  }
-
-  Widget buildPasswordField(String hintText, bool isVisible, Function(bool) toggleVisibility, TextEditingController controller) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
-      child: TextField(
-        controller: controller,
-        obscureText: !isVisible,
-        decoration: InputDecoration(
-          hintText: hintText,
-          prefixIcon: const Icon(Icons.lock, color: Colors.grey),
-          suffixIcon: IconButton(
-            icon: Icon(isVisible ? Icons.visibility : Icons.visibility_off, color: Colors.grey),
-            onPressed: () => toggleVisibility(!isVisible),
-          ),
-          filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Colors.grey[500]!, width: 1.5),
-          ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-        ),
-      ),
     );
   }
 }
