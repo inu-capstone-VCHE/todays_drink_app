@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'signup_screen.dart';
 import 'package:todays_drink/firstloginscreens/inputinformation_screen.dart'; // ✅ 초기 정보 입력 화면
+import 'package:todays_drink/mainscreens/calendar_screen.dart'; // ✅ 캘린더 화면 import 추가
 
 class LoginDefaultScreen extends StatefulWidget {
   const LoginDefaultScreen({Key? key}) : super(key: key);
@@ -167,7 +168,7 @@ class _LoginDefaultScreenState extends State<LoginDefaultScreen> {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final token = data['jwtToken']['accessToken'];
-        final isFirstLogin = data['firstLogin'];
+        final isFirstLogin = data['firstLogin'] ?? false;
 
         showDialog(
           context: context,
@@ -179,7 +180,6 @@ class _LoginDefaultScreenState extends State<LoginDefaultScreen> {
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
-
                   if (isFirstLogin == true) {
                     Navigator.pushReplacement(
                       context,
@@ -188,8 +188,12 @@ class _LoginDefaultScreenState extends State<LoginDefaultScreen> {
                       ),
                     );
                   } else {
-                    // 👉 일반 사용자 흐름 - 예: 홈 화면 이동
-                    Navigator.pushReplacementNamed(context, '/home');
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => CalendarScreen(),
+                      ),
+                    );
                   }
                 },
                 child: const Text('확인'),
