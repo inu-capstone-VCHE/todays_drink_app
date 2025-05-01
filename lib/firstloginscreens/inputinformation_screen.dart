@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:todays_drink/firstloginscreens/alcoholTolerance_screen.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class InputInformationScreen extends StatefulWidget {
   const InputInformationScreen({super.key});
@@ -12,6 +14,37 @@ class _InputInformationScreenState extends State<InputInformationScreen> {
   String? gender;
   final TextEditingController heightController = TextEditingController();
   final TextEditingController weightController = TextEditingController();
+
+  Future<void> saveUserInfo() async {
+    final url = Uri.parse('http://54.180.90.1:8080/user/info');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'gender': gender == '남자', // true or false
+          'height': int.tryParse(heightController.text) ?? 0,
+          'weight': int.tryParse(weightController.text) ?? 0,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        // 다음 화면으로 이동
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const AlcoholAmountScreen()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('저장 실패: ${response.body}')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('에러 발생: $e')),
+      );
+    }
+  }
 
   bool showHeight = false;
   bool showWeight = false;
@@ -205,8 +238,9 @@ class _InputInformationScreenState extends State<InputInformationScreen> {
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                onPressed: (gender != null && isHeightEntered && isWeightEntered)
-                    ? () {
+                onPressed: isAllInfoEntered
+                    ? () async {
+                  await saveUserInfo(); // 서버에 정보 저장
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const AlcoholAmountScreen()),
