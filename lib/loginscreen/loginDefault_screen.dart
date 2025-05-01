@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'signup_screen.dart';
+import 'package:todays_drink/firstloginscreens/inputinformation_screen.dart'; // 👈 초기 정보 입력 화면 import
 
 class LoginDefaultScreen extends StatefulWidget {
   const LoginDefaultScreen({Key? key}) : super(key: key);
@@ -15,6 +16,8 @@ class _LoginDefaultScreenState extends State<LoginDefaultScreen> {
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
+  String? accessToken; // 👈 액세스 토큰 저장용 변수
 
   @override
   void dispose() {
@@ -152,28 +155,41 @@ class _LoginDefaultScreenState extends State<LoginDefaultScreen> {
 
   Future<void> _loginUser() async {
     final url = Uri.parse('http://54.180.90.1:8080/user/login');
+
     try {
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'name': _emailController.text,
-          'password': _passwordController.text,
+          'name': _emailController.text,        // 로그인 아이디 (name)
+          'password': _passwordController.text, // 비밀번호
         }),
-
       );
 
       if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final token = data['accessToken']; // ✅ 서버가 주는 토큰 키가 정확히 이거 맞는지 확인해야 함
+
+        // 팝업 보여주고, 닫으면 다음 화면으로 이동
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
+            backgroundColor: Colors.white,
             title: const Text('로그인 성공!'),
             content: const Text('성공적으로 로그인되었습니다.'),
             actions: [
               TextButton(
-                onPressed: () => Navigator.of(context).pop(),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => InputInformationScreen(accessToken: token), // 👈 초기화면으로 token 넘김
+                    ),
+                  );
+                },
                 child: const Text('확인'),
-              )
+              ),
             ],
           ),
         );

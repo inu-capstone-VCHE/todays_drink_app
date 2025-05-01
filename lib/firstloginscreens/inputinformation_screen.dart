@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:todays_drink/firstloginscreens/alcoholTolerance_screen.dart';
 
 class InputInformationScreen extends StatefulWidget {
-  const InputInformationScreen({super.key});
+  final String accessToken;
+  const InputInformationScreen({Key? key, required this.accessToken}) : super(key: key);
 
   @override
   _InputInformationScreenState createState() => _InputInformationScreenState();
