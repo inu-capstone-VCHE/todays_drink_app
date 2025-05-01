@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'signup_screen.dart';
-import 'package:todays_drink/firstloginscreens/inputinformation_screen.dart'; // 👈 초기 정보 입력 화면 import
+import 'package:todays_drink/firstloginscreens/inputinformation_screen.dart'; // ✅ 초기 정보 입력 화면
 
 class LoginDefaultScreen extends StatefulWidget {
   const LoginDefaultScreen({Key? key}) : super(key: key);
@@ -16,8 +16,6 @@ class _LoginDefaultScreenState extends State<LoginDefaultScreen> {
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
-  String? accessToken; // 👈 액세스 토큰 저장용 변수
 
   @override
   void dispose() {
@@ -161,16 +159,16 @@ class _LoginDefaultScreenState extends State<LoginDefaultScreen> {
         url,
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'name': _emailController.text,        // 로그인 아이디 (name)
-          'password': _passwordController.text, // 비밀번호
+          'name': _emailController.text,
+          'password': _passwordController.text,
         }),
       );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final token = data['accessToken']; // ✅ 서버가 주는 토큰 키가 정확히 이거 맞는지 확인해야 함
+        final token = data['accessToken']; // ✅ 실제 키 이름 확인 필요
 
-        // 팝업 보여주고, 닫으면 다음 화면으로 이동
+        // ✅ 로그인 성공 팝업 후 다음 화면으로 이동
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
@@ -184,7 +182,7 @@ class _LoginDefaultScreenState extends State<LoginDefaultScreen> {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => InputInformationScreen(accessToken: token), // 👈 초기화면으로 token 넘김
+                      builder: (_) => InputInformationScreen(accessToken: token),
                     ),
                   );
                 },
@@ -194,13 +192,36 @@ class _LoginDefaultScreenState extends State<LoginDefaultScreen> {
           ),
         );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('로그인 실패: ${response.body}')),
+        // ✅ 로그인 실패 시 팝업 표시
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            backgroundColor: Colors.white,
+            title: const Text('로그인 실패'),
+            content: const Text('일치하는 정보가 없습니다.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('확인'),
+              ),
+            ],
+          ),
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('에러 발생: $e')),
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          backgroundColor: Colors.white,
+          title: const Text('에러 발생'),
+          content: Text('ClientException: $e'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('확인'),
+            ),
+          ],
+        ),
       );
     }
   }
