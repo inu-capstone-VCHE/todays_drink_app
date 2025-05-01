@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:todays_drink/firstloginscreens/alcoholTolerance_screen.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class InputInformationScreen extends StatefulWidget {
   final String accessToken;
@@ -14,11 +16,44 @@ class _InputInformationScreenState extends State<InputInformationScreen> {
   final TextEditingController heightController = TextEditingController();
   final TextEditingController weightController = TextEditingController();
 
+  Future<void> saveUserInfo() async {
+    final url = Uri.parse('http://54.180.90.1:8080/user/info');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'gender': gender == '남자', // true or false
+          'height': int.tryParse(heightController.text) ?? 0,
+          'weight': int.tryParse(weightController.text) ?? 0,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        // 다음 화면으로 이동
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const AlcoholAmountScreen()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('저장 실패: ${response.body}')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('에러 발생: $e')),
+      );
+    }
+  }
+
   bool showHeight = false;
   bool showWeight = false;
 
   bool get isHeightEntered => heightController.text.isNotEmpty;
   bool get isWeightEntered => weightController.text.isNotEmpty;
+
+  bool get isAllInfoEntered => gender != null && isHeightEntered && isWeightEntered;
 
   @override
   Widget build(BuildContext context) {
@@ -198,23 +233,29 @@ class _InputInformationScreenState extends State<InputInformationScreen> {
               height: 50,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2E7B8C),
+                  backgroundColor: (gender != null && isHeightEntered && isWeightEntered)
+                      ? const Color(0xFF2E7B8C)
+                      : Colors.grey[300],
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Text('계속하기',
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontFamily: "NotoSansKR",
-                        fontWeight: FontWeight.w700
-                    )
-                ),
-                onPressed: () {
+                onPressed: isAllInfoEntered
+                    ? () async {
+                  await saveUserInfo(); // 서버에 정보 저장
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const AlcoholAmountScreen()),
                   );
-                },
+                }
+                    : null,
+                child: const Text(
+                  '계속하기',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontFamily: "NotoSansKR",
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 24),

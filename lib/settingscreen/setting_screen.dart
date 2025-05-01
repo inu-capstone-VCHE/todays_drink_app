@@ -14,18 +14,15 @@ class SettingScreen extends StatefulWidget {
 class _SettingScreenState extends State<SettingScreen> {
   File? _image;
   bool _isEditingName = false;
-  String _nickname = '정해인';
+  String _nickname = '닉네임';
   final TextEditingController _nicknameController = TextEditingController();
-
-  bool _isChecking = false;
-  bool? _isAvailable;
 
   Future<void> _pickImage() async {
     final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
         _image = File(pickedFile.path);
-        Provider.of<ProfileProvider>(context, listen: false).updateImage(File(pickedFile.path));
+        Provider.of<ProfileProvider>(context, listen: false).updateImage(_image!);
       });
     }
   }
@@ -35,6 +32,7 @@ class _SettingScreenState extends State<SettingScreen> {
     super.initState();
     final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
     _nicknameController.text = profileProvider.nickname;
+    _nickname = profileProvider.nickname;
     _image = profileProvider.imageFile;
   }
 
@@ -44,33 +42,19 @@ class _SettingScreenState extends State<SettingScreen> {
     super.dispose();
   }
 
-  Future<bool> _checkNicknameAvailable(String nickname) async {
-    await Future.delayed(const Duration(milliseconds: 500));
-    return nickname != '정해인';
-  }
-
   void _startEditing() {
     setState(() {
       _isEditingName = true;
       _nicknameController.text = _nickname;
-      _isAvailable = null;
     });
   }
 
-  void _checkDuplicate() async {
+  void _saveNickname() {
+    Provider.of<ProfileProvider>(context, listen: false)
+        .updateNickname(_nicknameController.text);
     setState(() {
-      _isChecking = true;
-    });
-    bool available = await _checkNicknameAvailable(_nicknameController.text);
-    setState(() {
-      _isAvailable = available;
-      _isChecking = false;
-      if (available) {
-        Provider.of<ProfileProvider>(context, listen: false).updateNickname(_nicknameController.text);
-        _nickname = _nicknameController.text;
-        _isEditingName = false;
-        _isAvailable = null;
-      }
+      _nickname = _nicknameController.text;
+      _isEditingName = false;
     });
   }
 
@@ -155,47 +139,26 @@ class _SettingScreenState extends State<SettingScreen> {
               ),
               const SizedBox(height: 20),
               _isEditingName
-                  ? Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                  ? Row(
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _nicknameController,
-                          autofocus: true,
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          onChanged: (_) {
-                            setState(() {
-                              _isAvailable = null;
-                            });
-                          },
-                        ),
+                  Expanded(
+                    child: TextField(
+                      controller: _nicknameController,
+                      autofocus: true,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
                       ),
-                      const SizedBox(width: 8),
-                      TextButton(
-                        onPressed: _isChecking ? null : _checkDuplicate,
-                        style: TextButton.styleFrom(
-                          foregroundColor: mainColor,
-                        ),
-                        child: _isChecking
-                            ? const SizedBox(
-                          width: 14,
-                          height: 14,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                            : const Text("저장"),
-                      ),
-                    ],
-                  ),
-                  if (_isAvailable != null && !_isAvailable!)
-                    const Text(
-                      "이미 사용 중인 닉네임입니다",
-                      style: TextStyle(color: Colors.red),
                     ),
+                  ),
+                  const SizedBox(width: 8),
+                  TextButton(
+                    onPressed: _saveNickname,
+                    style: TextButton.styleFrom(
+                      foregroundColor: mainColor,
+                    ),
+                    child: const Text("저장"),
+                  ),
                 ],
               )
                   : Row(
@@ -203,7 +166,10 @@ class _SettingScreenState extends State<SettingScreen> {
                 children: [
                   Text(
                     _nickname,
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(width: 4),
                   GestureDetector(

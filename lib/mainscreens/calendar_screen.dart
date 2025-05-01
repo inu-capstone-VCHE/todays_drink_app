@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'drinking_record_screen.dart';
-import 'drink_type_selection.dart';
+import 'DrunknessScreens/drink_type_selection.dart';
 import 'monthly_report_screen.dart';
 import 'package:todays_drink/drinking_record.dart';
 import 'dart:math';
@@ -190,7 +190,7 @@ class _CalendarScreenState extends State<CalendarScreen>
             Text(
               "${_focusedDay.year}. ${_focusedDay.month}",
               style: TextStyle(
-                fontFamily: 'NotoSansKR', // 🔥 폰트 적용
+                fontFamily: 'NotoSansKR',
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
                 fontStyle: FontStyle.italic,
@@ -260,7 +260,7 @@ class _CalendarScreenState extends State<CalendarScreen>
                     headerVisible: false,
                     calendarStyle: CalendarStyle(
                       defaultTextStyle: TextStyle(
-                        fontFamily: 'NotoSansKR', // 🔥 기본 날짜 폰트 적용
+                        fontFamily: 'NotoSansKR',
                         fontSize: 16,
                         color: Colors.black,
                       ),
@@ -286,23 +286,23 @@ class _CalendarScreenState extends State<CalendarScreen>
                         shape: BoxShape.circle,
                       ),
                       todayTextStyle: TextStyle(
-                        fontFamily: 'NotoSansKR', // 🔥 오늘 날짜 폰트 적용
+                        fontFamily: 'NotoSansKR',
                         color: Colors.black,
                         fontWeight: FontWeight.normal,
                       ),
                       selectedTextStyle: TextStyle(
-                        fontFamily: 'NotoSansKR', // 🔥 선택된 날짜 폰트 적용
+                        fontFamily: 'NotoSansKR',
                         color: Colors.black,
                         fontWeight: FontWeight.normal,
                       ),
                     ),
                     daysOfWeekStyle: DaysOfWeekStyle(
                       weekdayStyle: TextStyle(
-                        fontFamily: 'NotoSansKR', // 🔥 요일 폰트 적용
+                        fontFamily: 'NotoSansKR',
                         color: Colors.black,
                       ),
                       weekendStyle: TextStyle(
-                        fontFamily: 'NotoSansKR', // 🔥 주말 폰트 적용
+                        fontFamily: 'NotoSansKR',
                         color: Colors.black,
                       ),
                     ),
@@ -337,6 +337,8 @@ class _CalendarScreenState extends State<CalendarScreen>
                         final isFuture = day.isAfter(DateTime.now()); // 미래 날짜 확인
                         final isSunday = day.weekday == DateTime.sunday;
                         final isSaturday = day.weekday == DateTime.saturday;
+                        final dateKey = "${day.year}-${day.month}-${day.day}";
+                        final hasRecord = drinkingRecords.containsKey(dateKey);
 
                         return Center(
                           child: Text(
@@ -345,14 +347,15 @@ class _CalendarScreenState extends State<CalendarScreen>
                               fontFamily: 'NotoSansKR',
                               fontSize: 16,
                               fontWeight: FontWeight.normal,
-                              color: isFuture
-                                  ? Colors.grey // 미래 날짜 회색
+                              color: hasRecord
+                                  ? Colors.transparent
+                                  : isFuture
+                                  ? Colors.grey
                                   : isSunday
-                                  ? Colors.red // 일요일 날짜 빨강
+                                  ? Colors.red
                                   : isSaturday
                                   ? Colors.blue
                                   : Colors.black,
-
                             ),
                           ),
                         );
@@ -370,7 +373,6 @@ class _CalendarScreenState extends State<CalendarScreen>
 
 
                           if (drankSoju && drankBeer) {
-                            // 소주 + 맥주 둘 다 마셨을 때 랜덤 (고정된 랜덤!)
                             final seed = day.year * 10000 + day.month * 100 + day.day;
                             final isSoju = Random(seed).nextBool();
                             assetPath = isSoju ? "assets/soju.png" : "assets/beer.png";
@@ -382,21 +384,49 @@ class _CalendarScreenState extends State<CalendarScreen>
                             return null; // 둘 다 안 마셨으면 표시 안 함
                           }
 
-                          return Center(  // <-- ✅ Center로 바꿔 날짜 중앙으로 병 배치
-                            child: Container(
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.transparent,
-                              ),
-                              child: Image.asset(
-                                assetPath,
-                                width: 32,  // ✅ 아이콘 크기 조정으로 숫자를 덮게 함
-                                height: 32,
-                              ),
+                          return Center(
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Container(
+                                  width: 32,
+                                  height: 32,
+                                ),
+                                Image.asset(
+                                  assetPath,
+                                  width: 40,
+                                  height: 40,
+                                ),
+                              ],
                             ),
                           );
                         }
                         return null;
+                      },
+                      selectedBuilder: (context, day, focusedDay) {
+                        final dateKey = "${day.year}-${day.month}-${day.day}";
+                        final hasRecord = drinkingRecords.containsKey(dateKey);
+
+                        return Center(
+                          child: Container(
+                            width: 44, // ✅ 기본 선택 원 크기 맞춤
+                            height: 44,
+                            decoration: BoxDecoration(
+                              color: Color(0xFFF2D027),
+                              shape: BoxShape.circle,
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              '${day.day}',
+                              style: TextStyle(
+                                fontFamily: 'NotoSansKR',
+                                fontSize: 16,
+                                fontWeight: FontWeight.normal,
+                                color: hasRecord ? Colors.transparent : Colors.black,
+                              ),
+                            ),
+                          ),
+                        );
                       },
                     ),
                   ),
