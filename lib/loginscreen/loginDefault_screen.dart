@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'signup_screen.dart'; // ✅ 회원가입 화면 import
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'signup_screen.dart';
 
 class LoginDefaultScreen extends StatefulWidget {
   const LoginDefaultScreen({Key? key}) : super(key: key);
@@ -10,6 +12,16 @@ class LoginDefaultScreen extends StatefulWidget {
 
 class _LoginDefaultScreenState extends State<LoginDefaultScreen> {
   bool _passwordVisible = false;
+
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,10 +54,10 @@ class _LoginDefaultScreenState extends State<LoginDefaultScreen> {
             ),
             const SizedBox(height: 40),
 
-            // ✅ 이메일
             const Text("이메일", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
             const SizedBox(height: 8),
             TextField(
+              controller: _emailController,
               decoration: InputDecoration(
                 hintText: "이메일을 입력해주세요.",
                 border: OutlineInputBorder(
@@ -57,10 +69,10 @@ class _LoginDefaultScreenState extends State<LoginDefaultScreen> {
 
             const SizedBox(height: 20),
 
-            // ✅ 비밀번호
             const Text("비밀번호", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
             const SizedBox(height: 8),
             TextField(
+              controller: _passwordController,
               obscureText: !_passwordVisible,
               decoration: InputDecoration(
                 hintText: "비밀번호를 입력해주세요.",
@@ -83,14 +95,11 @@ class _LoginDefaultScreenState extends State<LoginDefaultScreen> {
 
             const SizedBox(height: 30),
 
-            // ✅ 로그인 버튼
             SizedBox(
               width: screenWidth,
               height: 50,
               child: ElevatedButton(
-                onPressed: () {
-                  // TODO: 로그인 로직 추가
-                },
+                onPressed: _loginUser,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2D6876),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -108,7 +117,6 @@ class _LoginDefaultScreenState extends State<LoginDefaultScreen> {
 
             const SizedBox(height: 20),
 
-            // ✅ 회원가입 텍스트
             Center(
               child: GestureDetector(
                 onTap: () {
@@ -140,5 +148,44 @@ class _LoginDefaultScreenState extends State<LoginDefaultScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _loginUser() async {
+    final url = Uri.parse('http://54.180.90.1:8080/user/login');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'name': _emailController.text,
+          'password': _passwordController.text,
+        }),
+
+      );
+
+      if (response.statusCode == 200) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('로그인 성공!'),
+            content: const Text('성공적으로 로그인되었습니다.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('확인'),
+              )
+            ],
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('로그인 실패: ${response.body}')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('에러 발생: $e')),
+      );
+    }
   }
 }
