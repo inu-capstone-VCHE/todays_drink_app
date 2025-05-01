@@ -166,9 +166,9 @@ class _LoginDefaultScreenState extends State<LoginDefaultScreen> {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final token = data['accessToken']; // ✅ 실제 키 이름 확인 필요
+        final token = data['jwtToken']['accessToken'];
+        final isFirstLogin = data['firstLogin'];
 
-        // ✅ 로그인 성공 팝업 후 다음 화면으로 이동
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
@@ -179,12 +179,18 @@ class _LoginDefaultScreenState extends State<LoginDefaultScreen> {
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => InputInformationScreen(accessToken: token),
-                    ),
-                  );
+
+                  if (isFirstLogin == true) {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => InputInformationScreen(accessToken: token),
+                      ),
+                    );
+                  } else {
+                    // 👉 일반 사용자 흐름 - 예: 홈 화면 이동
+                    Navigator.pushReplacementNamed(context, '/home');
+                  }
                 },
                 child: const Text('확인'),
               ),
@@ -192,7 +198,6 @@ class _LoginDefaultScreenState extends State<LoginDefaultScreen> {
           ),
         );
       } else {
-        // ✅ 로그인 실패 시 팝업 표시
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
