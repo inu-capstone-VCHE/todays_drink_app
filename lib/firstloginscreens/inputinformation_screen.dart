@@ -8,6 +8,7 @@ class InputInformationScreen extends StatefulWidget {
   const InputInformationScreen({Key? key, required this.accessToken}) : super(key: key);
 
   @override
+  @override
   _InputInformationScreenState createState() => _InputInformationScreenState();
 }
 
