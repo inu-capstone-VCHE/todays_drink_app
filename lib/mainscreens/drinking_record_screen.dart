@@ -40,65 +40,102 @@ class _DrinkingRecordScreenState extends State<DrinkingRecordScreen> {
   void _showExitDialog() {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           backgroundColor: Colors.white,
-          title: Text(
-            "페이지 나가기",
-            style: TextStyle(
-              fontFamily: "NotoSansKR",
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
+          child: SizedBox(
+            width: 400,
+            height: 200,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24.0),
+                  child: Text(
+                    "페이지 나가기",
+                    style: TextStyle(
+                      fontFamily: "NotoSansKR",
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24.0),
+                  child: Text(
+                    "작성한 내용은 저장되지 않아!",
+                    style: TextStyle(
+                      fontFamily: "NotoSansKR",
+                      fontSize: 15,
+                      fontWeight: FontWeight.w400,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const SizedBox(height: 32),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            Navigator.pop(context); // 다이얼로그만 닫기
+                          },
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Colors.black),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            minimumSize: const Size(0, 48),
+                          ),
+                          child: const Text(
+                            "계속 작성하기",
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontFamily: "NotoSansKR",
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context); // 다이얼로그 닫기
+                            Navigator.pop(context); // 음주 기록 화면 닫기
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.grey[850],
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            minimumSize: const Size(0, 48),
+                          ),
+                          child: const Text(
+                            "나가기",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontFamily: "NotoSansKR",
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              ],
             ),
           ),
-          content: Text(
-            "작성한 내용은 저장되지 않아!",
-            style: TextStyle(
-              fontFamily: "NotoSansKR",
-              fontSize: 15,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context); // 다이얼로그만 닫기
-              },
-              style: TextButton.styleFrom(
-                side: BorderSide(color: Colors.black),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                minimumSize: Size(120, 48),
-              ),
-              child: Text("계속 작성하기",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontFamily: "NotoSansKR",
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                  ),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context); // 다이얼로그 닫기
-                Navigator.pop(context); // 음주 기록 화면 닫기
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                minimumSize: Size(120, 48),
-              ),
-              child: Text("나가기",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontFamily: "NotoSansKR",
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                  ),
-              ),
-            ),
-          ],
         );
       },
     );
