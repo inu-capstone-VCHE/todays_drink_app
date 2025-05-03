@@ -20,9 +20,12 @@ class _InputInformationScreenState extends State<InputInformationScreen> {
   Future<void> saveUserInfo() async {
     final url = Uri.parse('http://54.180.90.1:8080/user/info');
     try {
-      final response = await http.post(
+      final response = await http.put(
         url,
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${widget.accessToken}', // accessToken 추가 (필요 시)
+        },
         body: jsonEncode({
           'gender': gender == '남자', // true or false
           'height': int.tryParse(heightController.text) ?? 0,
@@ -34,7 +37,9 @@ class _InputInformationScreenState extends State<InputInformationScreen> {
         // 다음 화면으로 이동
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => const AlcoholAmountScreen()),
+          MaterialPageRoute(
+            builder: (_) => AlcoholAmountScreen(accessToken: widget.accessToken),
+          ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -245,7 +250,9 @@ class _InputInformationScreenState extends State<InputInformationScreen> {
                   await saveUserInfo(); // 서버에 정보 저장
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const AlcoholAmountScreen()),
+                    MaterialPageRoute(
+                      builder: (_) => AlcoholAmountScreen(accessToken: widget.accessToken),
+                    ),
                   );
                 }
                     : null,

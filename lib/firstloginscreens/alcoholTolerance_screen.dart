@@ -2,17 +2,65 @@ import 'package:flutter/material.dart';
 import 'package:todays_drink/firstloginscreens/pledge_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:todays_drink/providers/profile_provider.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class AlcoholAmountScreen extends StatefulWidget {
-  const AlcoholAmountScreen({super.key});
+  final String accessToken;
+  const AlcoholAmountScreen({super.key, required this.accessToken});
 
   @override
   State<AlcoholAmountScreen> createState() => _AlcoholAmountScreenState();
 }
 
 class _AlcoholAmountScreenState extends State<AlcoholAmountScreen> {
-  String? drinkType; // 'soju' or 'beer'
+  String? drinkType; // '소주' or '맥주'
   double amount = 0.0;
+
+  Future<void> saveGoalInfo() async {
+    final url = Uri.parse('http://54.180.90.1:8080/goal/first');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${widget.accessToken}',
+        },
+        body: jsonEncode({
+          'type': drinkType == '소주' ? 'soju' : 'beer',
+          'count': amount.round(),
+        }),
+      );
+
+      print('📥 응답 statusCode: ${response.statusCode}');
+      print('📥 응답 body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final goalId = (data['id'] as num?)?.toInt() ?? 0;
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => PledgeScreen(
+              accessToken: widget.accessToken,
+              goalId: goalId,
+            ),
+          ),
+        );
+
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('주량 저장 실패: ${response.body}')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('에러 발생: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,8 +84,7 @@ class _AlcoholAmountScreenState extends State<AlcoholAmountScreen> {
               style: TextStyle(
                   fontFamily: 'NotoSansKR',
                   fontSize: 20,
-                  fontWeight: FontWeight.w800)
-              ,
+                  fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 8),
             const Text(
@@ -46,8 +93,7 @@ class _AlcoholAmountScreenState extends State<AlcoholAmountScreen> {
                   fontFamily: "NotoSansKR",
                   fontSize: 14,
                   fontWeight: FontWeight.w800,
-                  color: Colors.grey
-              ),
+                  color: Colors.grey),
             ),
             const SizedBox(height: 24),
             Row(
@@ -101,7 +147,7 @@ class _AlcoholAmountScreenState extends State<AlcoholAmountScreen> {
                 value: amount,
                 min: 0.0,
                 max: 10.0,
-                divisions: 20, // 0.5 단위로 쪼개기 (0.0 ~ 10.0)
+                divisions: 20,
                 activeColor: const Color(0xFFF2D027),
                 label: '${amount.toStringAsFixed(1)}병',
                 onChanged: (value) {
@@ -123,30 +169,20 @@ class _AlcoholAmountScreenState extends State<AlcoholAmountScreen> {
               height: 50,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: drinkType != null ? const Color(0xFF2E7B8C) : Colors.grey[300],
+                  backgroundColor: drinkType != null
+                      ? const Color(0xFF2E7B8C)
+                      : Colors.grey[300],
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                onPressed: drinkType != null
-                    ? () {
-                  Provider.of<ProfileProvider>(context, listen: false)
-                      .updateDrinkingInfo(drinkType!, amount);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const PledgeScreen()),
-                  );
-                }
-                    : null,
-
+                onPressed: drinkType != null ? saveGoalInfo : null,
                 child: const Text('계속하기',
                     style: TextStyle(
-                      fontSize: 16,
-                      fontFamily: "NotoSansKR",
-                      fontWeight: FontWeight.w700
-                    )
-                ),
+                        fontSize: 16,
+                        fontFamily: "NotoSansKR",
+                        fontWeight: FontWeight.w700)),
               ),
             ),
             const SizedBox(height: 24),
