@@ -8,6 +8,7 @@ import 'dart:math';
 import 'package:todays_drink/settingscreen/setting_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:todays_drink/providers/profile_provider.dart';
+import 'package:todays_drink/mainscreens/bac.dart';
 
 class CalendarScreen extends StatefulWidget {
   @override
@@ -93,13 +94,32 @@ class _CalendarScreenState extends State<CalendarScreen>
                 );
               },
               child: const Text(
-                "취기 측정 모드",
+                "BAC 측정 모드",
                 style: TextStyle(
                   fontFamily: 'NotoSansKR',
                   fontSize: 18,
                 ),
               ),
             ),
+
+            const SizedBox(height: 20),
+
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const BacScreen()),
+                );
+              },
+              child: const Text(
+                "BAC란?",
+                style: TextStyle(
+                  fontFamily: 'NotoSansKR',
+                  fontSize: 18,
+                ),
+              ),
+            ),
+
           ],
         ),
       ),
