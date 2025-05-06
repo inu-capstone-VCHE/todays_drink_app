@@ -55,4 +55,14 @@ class ProfileProvider with ChangeNotifier {
     _accessToken = null;
     notifyListeners();
   }
+
+  void reset() {
+    _nickname = '닉네임';
+    _imageFile = null;
+    _drinkType = null;
+    _drinkAmount = null;
+    _pledgeLimit = null;
+    _accessToken = null;
+    notifyListeners();
+  }
 }

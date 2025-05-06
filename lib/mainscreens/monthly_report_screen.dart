@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:ui' as ui;
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:provider/provider.dart';
+import 'package:todays_drink/providers/profile_provider.dart';
 
 class MonthlyReportScreen extends StatefulWidget {
   @override
@@ -17,17 +21,99 @@ class _MonthlyReportScreenState extends State<MonthlyReportScreen> {
   bool _calculatedTop = false;
   double _highlightWidth = 0;
 
+  double _monthDrink = 0;
+  double _monthJoin = 0;
+  double _compareDrink = 0;
+  double _compareJoin = 0;
+  int _money = 0;
+  double _gookbob = 0;
+  int _calories = 0;
+  double _runningTime = 0;
+  int _abstainDays = 0;
+
+
   List<DateTime> get _availableMonths {
     final now = DateTime.now();
     return List.generate(24, (i) => DateTime(now.year, now.month - i));
+  }
+
+  Future<void> fetchMonthlyReport() async {
+    final formattedDate = DateFormat('yyyy-MM').format(_selectedMonth);
+    final url = Uri.parse('http://54.180.90.1:8080/report/');
+
+    final accessToken = Provider.of<ProfileProvider>(context, listen: false).accessToken;
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: jsonEncode({"date": formattedDate}),
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        if (data.isNotEmpty) {
+          final report = data[0];
+          setState(() {
+            _monthDrink = double.parse(report['monthDrink']);
+            _monthJoin = double.parse(report['monthJoin']);
+            _compareDrink = double.parse(report['compareDrink']);
+            _compareJoin = double.parse(report['compareJoin']);
+            _money = int.parse(report['money']);
+            _gookbob = double.parse(report['gookbob']);
+            _calories = int.parse(report['calories']);
+            _runningTime = double.parse(report['runningTime']);
+            _abstainDays = int.parse(report['abstainDays']);
+            _calculateTextWidth();
+          });
+        }
+      } else {
+        print("서버 오류: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("연결 실패: $e");
+    }
+  }
+
+  Widget _buildAbstainText() {
+    String text;
+
+    if (_abstainDays == -1) {
+      text = "현재 금주 생활 중";
+    } else {
+      text = "현재 금주 $_abstainDays일째";
+    }
+
+    return Stack(
+      alignment: Alignment.bottomLeft,
+      children: [
+        if (_abstainDays != -1)
+          Container(
+            width: _highlightWidth,
+            height: 11,
+            color: const Color(0xFFF2D027),
+          ),
+        Text(
+          text,
+          style: const TextStyle(
+            fontFamily: 'NotoSansKR',
+            fontSize: 24,
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
   }
 
   @override
   void initState() {
     super.initState();
     final initialIndex = _availableMonths.indexWhere((date) =>
-    date.year == _selectedMonth.year &&
-        date.month == _selectedMonth.month);
+    date.year == _selectedMonth.year && date.month == _selectedMonth.month);
     _scrollController = FixedExtentScrollController(initialItem: initialIndex);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -41,12 +127,57 @@ class _MonthlyReportScreenState extends State<MonthlyReportScreen> {
           _calculatedTop = true;
         });
       }
+      fetchMonthlyReport();
     });
+  }
+
+  Map<String, dynamic> getDrinkDiffInfo() {
+    final diff = _compareDrink;
+
+    if (diff > 0) {
+      return {
+        "text": "+${diff.toStringAsFixed(1)}병",
+        "color": const Color(0xFFFE8989), // 빨강
+      };
+    } else if (diff < 0) {
+      return {
+        "text": "${diff.toStringAsFixed(1)}병",
+        "color": const Color(0xFF91B6FD), // 파랑
+      };
+    } else {
+      return {
+        "text": "변동없음",
+        "color": Colors.grey,
+      };
+    }
+  }
+
+  Map<String, dynamic> getJoinDiffInfo() {
+    final diff = _compareJoin;
+
+    if (diff > 0) {
+      return {
+        "text": "+${diff.toStringAsFixed(0)}일",
+        "color": const Color(0xFFFE8989),
+      };
+    } else if (diff < 0) {
+      return {
+        "text": "${diff.toStringAsFixed(0)}일",
+        "color": const Color(0xFF91B6FD),
+      };
+    } else {
+      return {
+        "text": "변동없음",
+        "color": Colors.grey,
+      };
+    }
   }
 
   void _calculateTextWidth() {
     final text = TextSpan(
-      text: "현재 금주 3일째",
+      text: _abstainDays == -1
+          ? "현재 금주 생활 중"
+          : "현재 금주 $_abstainDays일째",
       style: const TextStyle(
         fontFamily: 'NotoSansKR',
         fontSize: 24,
@@ -58,6 +189,7 @@ class _MonthlyReportScreenState extends State<MonthlyReportScreen> {
       maxLines: 1,
       textDirection: ui.TextDirection.ltr,
     )..layout();
+
     setState(() {
       _highlightWidth = tp.size.width;
     });
@@ -73,10 +205,14 @@ class _MonthlyReportScreenState extends State<MonthlyReportScreen> {
 
   void _confirmSelectedMonth() {
     setState(() => _isDropdownOpen = false);
+    fetchMonthlyReport();
   }
 
   @override
   Widget build(BuildContext context) {
+    final drinkDiff = getDrinkDiffInfo();
+    final joinDiff = getJoinDiffInfo();
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
@@ -131,10 +267,10 @@ class _MonthlyReportScreenState extends State<MonthlyReportScreen> {
                         if (!_isDropdownOpen)
                           Align(
                             alignment: Alignment.centerRight,
-                              child: IconButton(
-                                icon: const Icon(Icons.close, color: Colors.black),
-                                onPressed: () => Navigator.pop(context),
-                              ),
+                            child: IconButton(
+                              icon: const Icon(Icons.close, color: Colors.black),
+                              onPressed: () => Navigator.pop(context),
+                            ),
                           ),
                       ],
                     ),
@@ -162,8 +298,10 @@ class _MonthlyReportScreenState extends State<MonthlyReportScreen> {
                               color: const Color(0xFFF2D027),
                               margin: const EdgeInsets.only(bottom: 0),
                             ),
-                            const Text(
-                              "현재 금주 3일째",
+                            Text(
+                              _abstainDays == -1
+                                  ? "현재 금주 생활 중"
+                                  : "현재 금주 $_abstainDays일째",
                               style: TextStyle(
                                 fontFamily: 'NotoSansKR',
                                 fontSize: 24,
@@ -200,9 +338,9 @@ class _MonthlyReportScreenState extends State<MonthlyReportScreen> {
                                       children: [
                                         Row(
                                           mainAxisAlignment: MainAxisAlignment.center,
-                                          children: const [
+                                          children: [
                                             Text(
-                                              '0',
+                                              '$_monthDrink',
                                               style: TextStyle(
                                                 fontSize: 24,
                                                 fontFamily: 'NotoSansKR',
@@ -217,15 +355,21 @@ class _MonthlyReportScreenState extends State<MonthlyReportScreen> {
                                         const SizedBox(height: 8),
                                         const Text('저번달 대비', style: TextStyle(fontFamily: 'NotoSansKR', color: Colors.grey)),
                                         const SizedBox(height: 8),
+
                                         Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                                           decoration: BoxDecoration(
-                                            color: Color(0xFFE0E0E0),
+                                            color: drinkDiff["color"],
                                             borderRadius: BorderRadius.circular(20),
                                           ),
-                                          child: const Text(
-                                            '- 변동없음',
-                                            style: TextStyle(fontSize: 12, fontFamily: 'NotoSansKR', color: Colors.black54),
+                                          child: Text(
+                                            drinkDiff["text"],
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w500,
+                                              fontFamily: 'NotoSansKR',
+                                              color: Colors.white,
+                                            ),
                                           ),
                                         ),
                                       ],
@@ -259,9 +403,9 @@ class _MonthlyReportScreenState extends State<MonthlyReportScreen> {
                                       children: [
                                         Row(
                                           mainAxisAlignment: MainAxisAlignment.center,
-                                          children: const [
+                                          children: [
                                             Text(
-                                              '0',
+                                              '${_monthJoin.toInt()}',
                                               style: TextStyle(
                                                 fontSize: 24,
                                                 fontFamily: 'NotoSansKR',
@@ -279,12 +423,17 @@ class _MonthlyReportScreenState extends State<MonthlyReportScreen> {
                                         Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                                           decoration: BoxDecoration(
-                                            color: Color(0xFFE0E0E0),
+                                            color: joinDiff["color"],
                                             borderRadius: BorderRadius.circular(20),
                                           ),
-                                          child: const Text(
-                                            '- 변동없음',
-                                            style: TextStyle(fontSize: 12, fontFamily: 'NotoSansKR', color: Colors.black54),
+                                          child: Text(
+                                            joinDiff["text"],
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w500,
+                                              fontFamily: 'NotoSansKR',
+                                              color: Colors.white,
+                                            ),
                                           ),
                                         ),
                                       ],
@@ -302,7 +451,7 @@ class _MonthlyReportScreenState extends State<MonthlyReportScreen> {
                             TextSpan(
                               children: [
                                 TextSpan(
-                                  text: '알려드려요   ',
+                                  text: '알려드려요  ',
                                   style: TextStyle(
                                     fontFamily: 'NotoSansKR',
                                     fontSize: 18,
@@ -348,7 +497,7 @@ class _MonthlyReportScreenState extends State<MonthlyReportScreen> {
                                   text: TextSpan(
                                     children: [
                                       TextSpan(
-                                        text: '0',  // 숫자 0 스타일
+                                        text: '$_money',  // 숫자 0 스타일
                                         style: TextStyle(
                                           fontSize: 24,
                                           fontFamily: 'NotoSansKR',
@@ -383,7 +532,7 @@ class _MonthlyReportScreenState extends State<MonthlyReportScreen> {
                                         ),
                                       ),
                                       TextSpan(
-                                        text: ' 0그릇',  // '원' 글자 스타일
+                                        text: ' $_gookbob그릇',  // '원' 글자 스타일
                                         style: TextStyle(
                                           fontSize: 16,
                                           fontFamily: 'NotoSansKR',
@@ -425,7 +574,7 @@ class _MonthlyReportScreenState extends State<MonthlyReportScreen> {
                                   text: TextSpan(
                                     children: [
                                       TextSpan(
-                                        text: '0',  // 숫자 0 스타일
+                                        text: '$_calories',  // 숫자 0 스타일
                                         style: TextStyle(
                                           fontSize: 24,
                                           fontFamily: 'NotoSansKR',
@@ -453,7 +602,7 @@ class _MonthlyReportScreenState extends State<MonthlyReportScreen> {
                                   text: TextSpan(
                                     children: [
                                       TextSpan(
-                                        text: '0시간',  // 숫자 0 스타일
+                                        text: '$_runningTime시간',  // 숫자 0 스타일
                                         style: TextStyle(
                                           fontSize: 16,
                                           fontFamily: 'NotoSansKR',

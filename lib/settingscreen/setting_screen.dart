@@ -4,7 +4,8 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:provider/provider.dart';
-import 'package:todays_drink/providers/profile_provider.dart'; // 단지 imageFile 저장용으로만 씀
+import 'package:todays_drink/providers/profile_provider.dart';
+import 'package:todays_drink/launchscreen/start_screen2.dart';
 
 class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
@@ -79,10 +80,9 @@ class _SettingScreenState extends State<SettingScreen> {
       setState(() {
         _drinkType = data['type'];
         _drinkAmount = (data['count'] as num?)?.toDouble();
-        _monthGoal = data['month_goal'];
-
-        print('📦 setState 이후: $_drinkType / $_drinkAmount / $_monthGoal');
+        _monthGoal = (data['month_goal'] as num?)?.toInt(); // 💥 여기 수정
       });
+
     } else {
       print('❌ 목표 정보 요청 실패: ${response.statusCode}');
     }
@@ -209,7 +209,7 @@ class _SettingScreenState extends State<SettingScreen> {
                   const SizedBox(width: 20),
                   Text(
                     _drinkType != null && _drinkAmount != null
-                        ? '$_drinkType ${_drinkAmount!.toStringAsFixed(1)}병'
+                        ? '${_drinkType == 'soju' ? '소주' : _drinkType == 'beer' ? '맥주' : _drinkType} ${_drinkAmount!.toStringAsFixed(1)}병'
                         : '정보 없음',
                     style: const TextStyle(fontSize: 16),
                   ),
@@ -235,9 +235,19 @@ class _SettingScreenState extends State<SettingScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  TextButton(onPressed: () {}, child: const Text('로그아웃')),
-                  const Text('|', style: TextStyle(color: Colors.grey)),
-                  TextButton(onPressed: () {}, child: const Text('회원 탈퇴')),
+                  TextButton(
+                    onPressed: () {
+                      // 모든 상태 초기화
+                      Provider.of<ProfileProvider>(context, listen: false).reset();
+
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (_) => StartScreen2()), // 걍 직접 써도 돼
+                            (route) => false,
+                      );
+                    },
+                    child: const Text('로그아웃'),
+                  ),
                 ],
               ),
             ],

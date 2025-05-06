@@ -26,6 +26,7 @@ class _CalendarScreenState extends State<CalendarScreen>
   late Animation<double> _slideAnimation;
   double _calendarHeight = 600;
   double _recordHeight = 230;
+  String _nickname = '';
 
   Map<String, List<DrinkingRecord>> drinkingRecords = {};
 
@@ -42,7 +43,33 @@ class _CalendarScreenState extends State<CalendarScreen>
       curve: Curves.easeInOut,
     );
 
+    fetchUserNickname();
     fetchUserRecords();
+  }
+
+  Future<void> fetchUserNickname() async {
+    final accessToken = Provider.of<ProfileProvider>(context, listen: false).accessToken;
+
+    try {
+      final response = await http.get(
+        Uri.parse('http://54.180.90.1:8080/user'),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(utf8.decode(response.bodyBytes));
+        setState(() {
+          _nickname = data['nickname'] ?? "";
+        });
+      } else {
+        print("닉네임 요청 실패: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("닉네임 요청 예외 발생: $e");
+    }
   }
 
   Future<void> fetchUserRecords() async {
@@ -102,6 +129,33 @@ class _CalendarScreenState extends State<CalendarScreen>
     }
   }
 
+  Future<void> deleteDrinkingRecord({
+    required String date,
+    required String title,
+    required String accessToken,
+  }) async {
+    final url = Uri.parse('http://54.180.90.1:8080/calender/delete');
+
+    final response = await http.delete(
+      url,
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'date': date,
+        'title': title,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      print("✅ 삭제 성공");
+    } else {
+      print("❌ 삭제 실패: ${response.statusCode}");
+      throw Exception("삭제 실패");
+    }
+  }
+
   void _showDeleteDialog(DrinkingRecord record, String dateKey) {
     showDialog(
       context: context,
@@ -149,11 +203,22 @@ class _CalendarScreenState extends State<CalendarScreen>
                     children: [
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: () {
-                            // ✅ record 삭제 로직
+                          onPressed: () async {
+                            final accessToken = Provider.of<ProfileProvider>(context, listen: false).accessToken;
+                            final dateString = "${record.date.year.toString().padLeft(4, '0')}-${record.date.month.toString().padLeft(2, '0')}-${record.date.day.toString().padLeft(2, '0')}";
+
+                            try {
+                              await deleteDrinkingRecord(
+                                  date: dateString,
+                                  title: record.title,
+                                  accessToken: accessToken!,
+                              );
+                            } catch (e) {
+                              print ("🔥 삭제 중 오류 발생: $e");
+                            }
+
                             setState(() {
                               drinkingRecords[dateKey]?.remove(record);
-                              // 리스트가 비면 map 자체도 삭제
                               if (drinkingRecords[dateKey]?.isEmpty ?? true) {
                                 drinkingRecords.remove(dateKey);
                                 _showRecord = false;
@@ -244,7 +309,7 @@ class _CalendarScreenState extends State<CalendarScreen>
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      profile.nickname,
+                      _nickname,
                       style: const TextStyle(
                         fontFamily: 'NotoSansKR',
                         fontSize: 20,
@@ -553,6 +618,24 @@ class _CalendarScreenState extends State<CalendarScreen>
                           ),
                         );
                       },
+
+                      outsideBuilder: (context, day, focusedDay) {
+                        final dateKey = "${day.year}-${day.month}-${day.day}";
+                        final hasRecord = drinkingRecords.containsKey(dateKey);
+
+                        return Center(
+                          child: Text(
+                            '${day.day}',
+                            style: TextStyle(
+                              fontFamily: 'NotoSansKR',
+                              fontSize: 16,
+                              fontWeight: FontWeight.normal,
+                              color: hasRecord ? Colors.transparent : Colors.grey,
+                            ),
+                          ),
+                        );
+                      },
+
                       markerBuilder: (context, day, events) {
                         String dateKey = "${day.year}-${day.month}-${day.day}";
 
