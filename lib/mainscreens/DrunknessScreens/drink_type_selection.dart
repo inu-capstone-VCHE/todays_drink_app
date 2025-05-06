@@ -14,13 +14,6 @@ class DrinkTypeSelectionScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
-          'BAC 측정 모드',
-          style: TextStyle(
-              fontSize: 18,
-              fontFamily: 'NotoSansKR'
-          ),
-        ),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),

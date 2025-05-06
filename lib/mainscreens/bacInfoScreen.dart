@@ -15,13 +15,6 @@ class BacScreen extends StatelessWidget {
           icon: Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
-          'BAC란?',
-          style: TextStyle(
-              fontSize: 18,
-              fontFamily: 'NotoSansKR'
-          ),
-        ),
       ),
       backgroundColor: Colors.white,
       body: Padding(

@@ -160,7 +160,7 @@ class _LoginDefaultScreenState extends State<LoginDefaultScreen> {
         url,
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'name': _emailController.text,
+          'email': _emailController.text,
           'password': _passwordController.text,
         }),
       );

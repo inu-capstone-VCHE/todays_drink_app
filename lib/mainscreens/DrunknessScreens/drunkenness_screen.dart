@@ -5,13 +5,9 @@ import 'package:todays_drink/mainscreens/calendar_screen.dart';
 
 // 단계별 데이터 구조
 class DrunkennessStageData {
-  final String title;
-  final String subtitle;
   final List<String> messages;
 
   DrunkennessStageData({
-    required this.title,
-    required this.subtitle,
     required this.messages,
   });
 }
@@ -62,6 +58,22 @@ class WavePainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
 
+final Map<int, Color> bacColorByLevel = {
+  1: Color(0xFFFF9191),
+  2: Color(0xFFFF7373),
+  3: Color(0xFFFF5555),
+  4: Color(0xFFFF3737),
+  5: Color(0xFFFF1919),
+};
+
+int getDrunkennessLevel(double bac) {
+  if (bac <= 0.03) return 1;
+  if (bac <= 0.06) return 2;
+  if (bac <= 0.10) return 3;
+  if (bac <= 0.20) return 4;
+  return 5;
+}
+
 class DrunkennessScreen extends StatefulWidget {
   final String drinkType;
 
@@ -76,54 +88,13 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
   int drunkennessLevel = 4;
 
   late DrunkennessStageData stage;
-  late String _randomMessage;
 
   final Map<int, DrunkennessStageData> stageDataMap = {
-    1: DrunkennessStageData(
-      title: "[ 이제 시작이지~ 😁 ]",
-      subtitle: "1단계",
-      messages: [
-        "오늘은 진짜 안 취한다.\n오늘은 진심 간술임.",
-        "오늘은 진짜 가볍게 ㄱㄱ",
-        "오늘은 취할 생각 없음~ㅎ"
-      ],
-    ),
-    2: DrunkennessStageData(
-      title: "[ 텐션 급상승 😜 ]",
-      subtitle: "2단계",
-      messages: [
-        "아 이제 시작 아님??\n한 잔만 더 ㄱㄱ",
-        "오늘은 진짜 안 취할 거야 ㅎㅎ\n걱정하지 마~",
-        "이제 함 제대로 마셔볼까??"
-      ],
-    ),
-    3: DrunkennessStageData(
-      title: "[ 감성 과부하 🥲 ]",
-      subtitle: "3단계",
-      messages: [
-        "야 너 진짜 내가 많이\n좋아하는 거 알지? ㅎㅠㅠ",
-        "이거 마시면...\n우리 우정 영원한 거다...",
-        "야 걔한테 오랜만에 전화해볼까?"
-      ],
-    ),
-    4: DrunkennessStageData(
-      title: "[ 현실 왜곡 🤯 ]",
-      subtitle: "4단계",
-      messages: [
-        "엥 내 에어팟 어디 갔어?..",
-        "잠만 핸드폰은 어디감?",
-        "간술: 간에다 술붓기 ㅋㅋㅋ"
-      ],
-    ),
-    5: DrunkennessStageData(
-      title: "[ 블랙아웃 🫥 ]",
-      subtitle: "5단계",
-      messages: [
-        "숙취와 후회가 내일을 기다려요...",
-        "여긴 어디 나는 누구..?\n(집에 가 빨리...)",
-        "어제 뭐 했더라...? (기억 삭제)"
-      ],
-    ),
+    1: DrunkennessStageData(messages: ["1단계 메세지"]),
+    2: DrunkennessStageData(messages: ["2단계 메세지"]),
+    3: DrunkennessStageData(messages: ["3단계 메세지"]),
+    4: DrunkennessStageData(messages: ["4단계 메세지"]),
+    5: DrunkennessStageData(messages: ["5단계 메세지"]),
   };
 
   double getBaseYRatio(int level) {
@@ -143,21 +114,19 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
     }
   }
 
+  double bac = 0.04;
+
   @override
   void initState() {
     super.initState();
+
+    drunkennessLevel = getDrunkennessLevel(bac);
     stage = stageDataMap[drunkennessLevel]!;
-    _randomMessage = getRandomMessage(stage.messages);
 
     _animationController = AnimationController(
       vsync: this,
       duration: Duration(seconds: 3),
     )..repeat();
-  }
-
-  String getRandomMessage(List<String> messages) {
-    final random = Random();
-    return messages[random.nextInt(messages.length)];
   }
 
   @override
@@ -232,7 +201,8 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
                                       minimumSize: const Size(0, 48), // height 고정, width는 Expanded가 조절
                                     ),
                                     child: const Text(
-                                      "계속 측정하기",
+                                      "계속\n측정하기",
+                                      textAlign: TextAlign.center,
                                       style: TextStyle(
                                         color: Colors.black,
                                         fontFamily: "NotoSansKR",
@@ -260,7 +230,8 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
                                       minimumSize: const Size(0, 48),
                                     ),
                                     child: const Text(
-                                      "저장하고 나가기",
+                                      "저장하고\n나가기",
+                                      textAlign: TextAlign.center,
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontFamily: "NotoSansKR",
@@ -324,23 +295,34 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    stage.title,
+                    "현재 예상 BAC 수치: ",
+                    style: TextStyle(
+                      fontFamily: 'NotoSansKR',
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFFF9191),
+                    ),
+                    textAlign: TextAlign.left,
+                  ),
+                  SizedBox(height: 1),
+                  Text(
+                    "${bac.toStringAsFixed(3)}%",
                     style: TextStyle(
                       fontFamily: 'NotoSansKR',
                       fontSize: 35,
                       fontWeight: FontWeight.bold,
-                      color: Colors.redAccent,
+                      color: bacColorByLevel[drunkennessLevel],
                     ),
                     textAlign: TextAlign.left,
                   ),
                   SizedBox(height: 10),
                   Text(
-                    stage.subtitle,
+                    stage.messages[0],
                     style: TextStyle(
                       fontFamily: 'NotoSansKR',
-                      fontSize: 25,
+                      fontSize: 15,
                       fontWeight: FontWeight.bold,
-                      color: Colors.redAccent,
+                      color: Colors.grey[800],
                     ),
                     textAlign: TextAlign.left,
                   ),
@@ -351,20 +333,11 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
                       fontFamily: 'NotoSansKR',
                       fontSize: 30,
                       fontWeight: FontWeight.bold,
+                      color: Colors.black,
                     ),
                     textAlign: TextAlign.left,
                   ),
                   SizedBox(height: 30),
-                  Text(
-                    "\"$_randomMessage\"",
-                    style: TextStyle(
-                      fontFamily: 'NotoSansKR',
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey[700],
-                    ),
-                    textAlign: TextAlign.left,
-                  ),
                 ],
               ),
             ),
