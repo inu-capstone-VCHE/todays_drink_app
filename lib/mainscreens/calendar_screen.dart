@@ -9,6 +9,8 @@ import 'package:todays_drink/settingscreen/setting_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:todays_drink/providers/profile_provider.dart';
 import 'package:todays_drink/mainscreens/bacInfoScreen.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class CalendarScreen extends StatefulWidget {
   @override
@@ -38,6 +40,177 @@ class _CalendarScreenState extends State<CalendarScreen>
     _slideAnimation = CurvedAnimation(
       parent: _animationController,
       curve: Curves.easeInOut,
+    );
+
+    fetchUserRecords();
+  }
+
+  Future<void> fetchUserRecords() async {
+    final accessToken = Provider.of<ProfileProvider>(context, listen: false).accessToken;
+    print('✅ 토큰: $accessToken');
+
+    final response = await http.get(
+      Uri.parse('http://54.180.90.1:8080/calender/'),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(utf8.decode(response.bodyBytes));
+
+      Map<String, Map<String, DrinkingRecord>> mergedRecords = {};
+
+      for (var item in data) {
+        final records = DrinkingRecord.fromJsonList(item); // ✅ 리스트로 받아옴
+
+        for (final record in records) {
+          final dateKey = "${record.date.year}-${record.date.month}-${record.date.day}";
+          final titleKey = record.title;
+
+          mergedRecords.putIfAbsent(dateKey, () => {});
+
+          if (mergedRecords[dateKey]!.containsKey(titleKey)) {
+            final existing = mergedRecords[dateKey]![titleKey]!;
+
+            mergedRecords[dateKey]![titleKey] = DrinkingRecord(
+              date: record.date,
+              title: record.title,
+              sojuAmount: existing.sojuAmount + record.sojuAmount,
+              sojuUnit: record.sojuAmount > 0 ? record.sojuUnit : existing.sojuUnit,
+              beerAmount: existing.beerAmount + record.beerAmount,
+              beerUnit: record.beerAmount > 0 ? record.beerUnit : existing.beerUnit,
+            );
+          } else {
+            mergedRecords[dateKey]![titleKey] = record;
+          }
+        }
+      }
+
+      // List 형태로 변환
+      Map<String, List<DrinkingRecord>> loadedRecords = {};
+      mergedRecords.forEach((dateKey, titleMap) {
+        loadedRecords[dateKey] = titleMap.values.toList();
+      });
+
+      setState(() {
+        drinkingRecords = loadedRecords;
+      });
+    } else {
+      print("🔥 실패: ${response.statusCode} / ${response.body}");
+    }
+  }
+
+  void _showDeleteDialog(DrinkingRecord record, String dateKey) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          backgroundColor: Colors.white,
+          child: SizedBox(
+            width: 400,
+            height: 200,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24.0),
+                  child: Text(
+                    "음주 기록 삭제",
+                    style: TextStyle(
+                      fontFamily: "NotoSansKR",
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24.0),
+                  child: Text(
+                    "삭제한 내용은 복구할 수 없어!",
+                    style: TextStyle(
+                      fontFamily: "NotoSansKR",
+                      fontSize: 15,
+                      fontWeight: FontWeight.w400,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const SizedBox(height: 32),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            // ✅ record 삭제 로직
+                            setState(() {
+                              drinkingRecords[dateKey]?.remove(record);
+                              // 리스트가 비면 map 자체도 삭제
+                              if (drinkingRecords[dateKey]?.isEmpty ?? true) {
+                                drinkingRecords.remove(dateKey);
+                                _showRecord = false;
+                              }
+                            });
+                            Navigator.pop(context); // 다이얼로그 닫기
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.black,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            minimumSize: const Size(0, 48),
+                          ),
+                          child: const Text(
+                            "삭제하기",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontFamily: "NotoSansKR",
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            Navigator.pop(context); // 그냥 닫기
+                          },
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Colors.black),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            minimumSize: const Size(0, 48),
+                          ),
+                          child: const Text(
+                            "닫기",
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontFamily: "NotoSansKR",
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -386,6 +559,10 @@ class _CalendarScreenState extends State<CalendarScreen>
                         if (drinkingRecords.containsKey(dateKey)) {
                           final record = drinkingRecords[dateKey]!;
 
+                          for (var r in record) {
+                            print("✅ $dateKey / title: ${r.title}, soju: ${r.sojuAmount}, beer: ${r.beerAmount}");
+                          }
+
                           String assetPath;
 
                           final drankSoju = record.any((r) => r.sojuAmount > 0);
@@ -501,52 +678,57 @@ class _CalendarScreenState extends State<CalendarScreen>
                                   padding: EdgeInsets.only(bottom: 16),
                                   itemBuilder: (context, index) {
                                     final record = recordList[index];
-                                    return Container(
-                                      margin: EdgeInsets.only(top: 10),
-                                      padding: EdgeInsets.all(12),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Stack(
-                                            alignment: Alignment.bottomLeft,
-                                            children: [
-                                              Container(
-                                                height: 8,
-                                                width: _getTextWidth(context, record.title, 16, FontWeight.w700),
-                                                color: Color(0xFFF2D027),
-                                                margin: EdgeInsets.only(bottom: 0),
-                                              ),
-                                              Text(
-                                                record.title,
-                                                style: TextStyle(
-                                                  fontFamily: 'NotoSansKR',
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w700,
-                                                  color: Colors.black,
+
+                                    return GestureDetector(
+                                      onTap: () => _showDeleteDialog(record, dateKey),
+                                      child: Container(
+                                        margin: EdgeInsets.only(top: 10),
+                                        padding: EdgeInsets.all(12),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Stack(
+                                              alignment: Alignment.bottomLeft,
+                                              children: [
+                                                Container(
+                                                  height: 8,
+                                                  width: _getTextWidth(context, record.title, 16, FontWeight.w700),
+                                                  color: Color(0xFFF2D027),
+                                                  margin: EdgeInsets.only(bottom: 0),
                                                 ),
-                                              ),
-                                            ],
-                                          ),
-                                          SizedBox(height: 15),
-                                          Row(
-                                            children: [
-                                              if (record.sojuUnit != null)
-                                                _buildDrinkItem("assets/soju.png", "${record.sojuAmount}${record.sojuUnit}"),
-                                              if (record.sojuUnit != null && record.beerUnit != null)
-                                                SizedBox(width: 20),
-                                              if (record.beerUnit != null)
-                                                _buildDrinkItem(
+                                                Text(
+                                                  record.title,
+                                                  style: TextStyle(
+                                                    fontFamily: 'NotoSansKR',
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w700,
+                                                    color: Colors.black,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            SizedBox(height: 15),
+                                            Row(
+                                              children: [
+                                                if (record.sojuUnit != null)
+                                                  _buildDrinkItem("assets/soju.png", "${record.sojuAmount}${record.sojuUnit}"),
+                                                if (record.sojuUnit != null && record.beerUnit != null)
+                                                  SizedBox(width: 20),
+                                                if (record.beerUnit != null)
+                                                  _buildDrinkItem(
                                                     "assets/beer.png",
                                                     record.beerUnit == "500ml"
-                                                    ? "${(record.beerAmount * 500).toInt()}ml"
-                                                    : "${record.beerAmount}${record.beerUnit}"),
-                                            ],
-                                          ),
-                                        ],
+                                                        ? "${(record.beerAmount * 500).toInt()}ml"
+                                                        : "${record.beerAmount}${record.beerUnit}",
+                                                  ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     );
                                   },

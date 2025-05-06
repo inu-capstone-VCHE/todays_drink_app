@@ -7,12 +7,10 @@ import 'package:provider/provider.dart';
 import 'package:todays_drink/providers/profile_provider.dart';
 
 class PledgeScreen extends StatefulWidget {
-  final String accessToken;
   final int goalId;
 
-  PledgeScreen({
+  const PledgeScreen({
     super.key,
-    required this.accessToken,
     required this.goalId,
   });
 
@@ -42,6 +40,7 @@ class _PledgeScreenState extends State<PledgeScreen> {
   }
 
   Future<void> submitPledge() async {
+    final accessToken = Provider.of<ProfileProvider>(context, listen: false).accessToken;
     final goal = int.tryParse(_controller.text.trim()) ?? 0;
     final url = Uri.parse('http://54.180.90.1:8080/goal/second');
 
@@ -59,7 +58,7 @@ class _PledgeScreenState extends State<PledgeScreen> {
         url,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${widget.accessToken}',
+          'Authorization': 'Bearer $accessToken',
         },
         body: jsonEncode(payload),
       );
@@ -88,11 +87,12 @@ class _PledgeScreenState extends State<PledgeScreen> {
   String? nickname;
 
   Future<void> fetchNickname() async {
+    final accessToken = Provider.of<ProfileProvider>(context, listen: false).accessToken;
     final url = Uri.parse('http://54.180.90.1:8080/user');
     final response = await http.get(
       url,
       headers: {
-        'Authorization' : 'Bearer ${widget.accessToken}',
+        'Authorization' : 'Bearer $accessToken',
       },
     );
 

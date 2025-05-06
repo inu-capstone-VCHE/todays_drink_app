@@ -12,7 +12,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => ProfileProvider()), // ✅ Provider 등록
       ],
-      child: const MyApp(),
+      child: MyApp(),
     ),
   );
 }

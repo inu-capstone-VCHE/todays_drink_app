@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:todays_drink/firstloginscreens/alcoholTolerance_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:provider/provider.dart';
+import 'package:todays_drink/providers/profile_provider.dart';
 
 class InputInformationScreen extends StatefulWidget {
-  final String accessToken;
-  const InputInformationScreen({Key? key, required this.accessToken}) : super(key: key);
+  const InputInformationScreen({Key? key}) : super(key: key);
 
   @override
   @override
@@ -18,13 +19,16 @@ class _InputInformationScreenState extends State<InputInformationScreen> {
   final TextEditingController weightController = TextEditingController();
 
   Future<void> saveUserInfo() async {
+    final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
+    final accessToken = profileProvider.accessToken;
+
     final url = Uri.parse('http://54.180.90.1:8080/user/info');
     try {
       final response = await http.put(
         url,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${widget.accessToken}', // accessToken 추가 (필요 시)
+          'Authorization': 'Bearer $accessToken',
         },
         body: jsonEncode({
           'gender': gender == '남자', // true or false
@@ -38,7 +42,7 @@ class _InputInformationScreenState extends State<InputInformationScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => AlcoholAmountScreen(accessToken: widget.accessToken),
+            builder: (_) => AlcoholAmountScreen(),
           ),
         );
       } else {
@@ -251,7 +255,7 @@ class _InputInformationScreenState extends State<InputInformationScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => AlcoholAmountScreen(accessToken: widget.accessToken),
+                      builder: (_) => AlcoholAmountScreen(),
                     ),
                   );
                 }

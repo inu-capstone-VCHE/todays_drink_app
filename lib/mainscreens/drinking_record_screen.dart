@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:todays_drink/drinking_record.dart';
+import 'package:provider/provider.dart';
+import 'package:todays_drink/providers/profile_provider.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class DrinkingRecordScreen extends StatefulWidget {
   final DateTime selectedDate;
@@ -95,7 +99,8 @@ class _DrinkingRecordScreenState extends State<DrinkingRecordScreen> {
                             minimumSize: const Size(0, 48),
                           ),
                           child: const Text(
-                            "계속 작성하기",
+                            "계속\n작성하기",
+                            textAlign: TextAlign.center,
                             style: TextStyle(
                               color: Colors.black,
                               fontFamily: "NotoSansKR",
@@ -674,22 +679,64 @@ class _DrinkingRecordScreenState extends State<DrinkingRecordScreen> {
                 height: 50,
                 child: ElevatedButton(
                   onPressed: _isFormValid()
-                      ? () {
-                          DateTime dateKey = DateTime(
-                            widget.selectedDate.year,
-                            widget.selectedDate.month,
-                            widget.selectedDate.day
-                          );
-                          Navigator.pop(context, DrinkingRecord(
-                            date: dateKey,
-                            title: _textController.text,
-                            sojuAmount: _isSojuSelected ? _sojuAmount : 0,
-                            sojuUnit: _selectedSojuUnit,
-                            beerAmount: _isBeerSelected ? _beerAmount : 0,
-                            beerUnit: _selectedBeerUnit,
-                          ));
+                      ? () async {
+                    final accessToken = Provider.of<ProfileProvider>(context, listen: false).accessToken;
+
+                    final url = Uri.parse('http://54.180.90.1:8080/calender/');
+                    final dateKey = DateTime(
+                      widget.selectedDate.year,
+                      widget.selectedDate.month,
+                      widget.selectedDate.day,
+                    );
+
+                    final payload = {
+                      "date": "${dateKey.year}-${dateKey.month.toString().padLeft(2, '0')}-${dateKey.day.toString().padLeft(2, '0')}",
+                      "title": _textController.text,
+                      "type": [
+                        if (_isSojuSelected) "soju",
+                        if (_isBeerSelected) "beer",
+                      ].join(','),
+                      "unit": [
+                        if (_isSojuSelected) _selectedSojuUnit ?? "",
+                        if (_isBeerSelected) _selectedBeerUnit ?? "",
+                      ].join(','),
+                      "count": [
+                        if (_isSojuSelected) _sojuAmount.toString(),
+                        if (_isBeerSelected) _beerAmount.toString(),
+                      ].join(','),
+                    };
+
+                    try {
+                      final response = await http.post(
+                        url,
+                        headers: {
+                          'Content-Type': 'application/json',
+                          'Authorization': 'Bearer $accessToken',
+                        },
+                        body: jsonEncode(payload),
+                      );
+
+                      if (response.statusCode == 200) {
+                        Navigator.pop(context, DrinkingRecord(
+                          date: dateKey,
+                          title: _textController.text,
+                          sojuAmount: _isSojuSelected ? _sojuAmount : 0,
+                          sojuUnit: _selectedSojuUnit,
+                          beerAmount: _isBeerSelected ? _beerAmount : 0,
+                          beerUnit: _selectedBeerUnit,
+                        ));
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("저장 실패: ${response.body}")),
+                        );
                       }
-                    : null, // ✅ 조건 충족 시 버튼 활성화
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("에러 발생: $e")),
+                      );
+                    }
+                  }
+                      : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black,
                     disabledBackgroundColor: Colors.grey[500],

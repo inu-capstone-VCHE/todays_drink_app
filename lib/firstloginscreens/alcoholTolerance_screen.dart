@@ -4,10 +4,11 @@ import 'package:provider/provider.dart';
 import 'package:todays_drink/providers/profile_provider.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:provider/provider.dart';
+import 'package:todays_drink/providers/profile_provider.dart';
 
 class AlcoholAmountScreen extends StatefulWidget {
-  final String accessToken;
-  const AlcoholAmountScreen({super.key, required this.accessToken});
+  const AlcoholAmountScreen({super.key});
 
   @override
   State<AlcoholAmountScreen> createState() => _AlcoholAmountScreenState();
@@ -18,6 +19,8 @@ class _AlcoholAmountScreenState extends State<AlcoholAmountScreen> {
   double amount = 0.0;
 
   Future<void> saveGoalInfo() async {
+    final accessToken = Provider.of<ProfileProvider>(context, listen: false).accessToken;
+
     final url = Uri.parse('http://54.180.90.1:8080/goal/first');
 
     try {
@@ -25,16 +28,13 @@ class _AlcoholAmountScreenState extends State<AlcoholAmountScreen> {
         url,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${widget.accessToken}',
+          'Authorization': 'Bearer $accessToken',
         },
         body: jsonEncode({
           'type': drinkType == '소주' ? 'soju' : 'beer',
-          'count': amount.round(),
+          'count': amount,
         }),
       );
-
-      print('📥 응답 statusCode: ${response.statusCode}');
-      print('📥 응답 body: ${response.body}');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -43,10 +43,7 @@ class _AlcoholAmountScreenState extends State<AlcoholAmountScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => PledgeScreen(
-              accessToken: widget.accessToken,
-              goalId: goalId,
-            ),
+            builder: (_) => PledgeScreen(goalId: goalId),
           ),
         );
 

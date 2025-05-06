@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'signup_screen.dart';
-import 'package:todays_drink/firstloginscreens/inputinformation_screen.dart'; // ✅ 초기 정보 입력 화면
-import 'package:todays_drink/mainscreens/calendar_screen.dart'; // ✅ 캘린더 화면 import 추가
+import 'package:todays_drink/firstloginscreens/inputinformation_screen.dart';
+import 'package:todays_drink/mainscreens/calendar_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:todays_drink/providers/profile_provider.dart';
 
 class LoginDefaultScreen extends StatefulWidget {
   const LoginDefaultScreen({Key? key}) : super(key: key);
@@ -160,15 +162,17 @@ class _LoginDefaultScreenState extends State<LoginDefaultScreen> {
         url,
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'email': _emailController.text,
+          'name': _emailController.text,
           'password': _passwordController.text,
         }),
       );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final token = data['jwtToken']['accessToken'];
+        final accessToken = data['jwtToken']['accessToken'];
         final isFirstLogin = data['firstLogin'] ?? false;
+
+        Provider.of<ProfileProvider>(context, listen: false).setAccessToken(accessToken);
 
         showDialog(
           context: context,
@@ -184,7 +188,7 @@ class _LoginDefaultScreenState extends State<LoginDefaultScreen> {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => InputInformationScreen(accessToken: token),
+                        builder: (_) => InputInformationScreen(),
                       ),
                     );
                   } else {
