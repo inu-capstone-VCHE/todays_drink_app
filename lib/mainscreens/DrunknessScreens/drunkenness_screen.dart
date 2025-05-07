@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:todays_drink/mainscreens/calendar_screen.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 // 단계별 데이터 구조
 class DrunkennessStageData {
@@ -87,16 +88,6 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
   late AnimationController _animationController;
   int drunkennessLevel = 4;
 
-  late DrunkennessStageData stage;
-
-  final Map<int, DrunkennessStageData> stageDataMap = {
-    1: DrunkennessStageData(messages: ["1단계 메세지"]),
-    2: DrunkennessStageData(messages: ["2단계 메세지"]),
-    3: DrunkennessStageData(messages: ["3단계 메세지"]),
-    4: DrunkennessStageData(messages: ["4단계 메세지"]),
-    5: DrunkennessStageData(messages: ["5단계 메세지"]),
-  };
-
   double getBaseYRatio(int level) {
     switch (level) {
       case 1:
@@ -114,14 +105,12 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
     }
   }
 
-  double bac = 0.04;
+  double bac = 0.15;
 
   @override
   void initState() {
     super.initState();
-
     drunkennessLevel = getDrunkennessLevel(bac);
-    stage = stageDataMap[drunkennessLevel]!;
 
     _animationController = AnimationController(
       vsync: this,
@@ -317,12 +306,12 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
                   ),
                   SizedBox(height: 10),
                   Text(
-                    stage.messages[0],
+                   "※ 위 수치는 추정치일 뿐 사람마다 개인차가 있을 수 있음.",
                     style: TextStyle(
                       fontFamily: 'NotoSansKR',
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey[800],
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[700],
                     ),
                     textAlign: TextAlign.left,
                   ),
@@ -337,7 +326,94 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
                     ),
                     textAlign: TextAlign.left,
                   ),
-                  SizedBox(height: 30),
+                  SizedBox(height: 70),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.only(left: 8.0, bottom: 4.0),
+                        child: Text(
+                          "BAC (%)",
+                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                          child: SizedBox(
+                            width: 1000,
+                            height: 250,
+                            child: LineChart(
+                              LineChartData(
+                                minY: 0.0,
+                                maxY: 0.25,
+                                backgroundColor: Colors.transparent,
+                                gridData: FlGridData(show: false),
+                                titlesData: FlTitlesData(
+                                  bottomTitles: AxisTitles(
+                                    sideTitles: SideTitles(
+                                      showTitles: true,
+                                      interval: 1,
+                                      getTitlesWidget: (value, _) {
+                                        final minutes = (value.toInt() * 5);
+                                        final hour = minutes ~/ 60;
+                                        final minute = minutes % 60;
+                                        final label = "${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}";
+                                        return Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500));
+                                      },
+                                    ),
+                                  ),
+                                  leftTitles: AxisTitles(
+                                    sideTitles: SideTitles(
+                                      showTitles: true,
+                                      reservedSize: 40,
+                                      interval: 0.05,
+                                      getTitlesWidget: (value, _) {
+                                        return Text(
+                                          value.toStringAsFixed(3),
+                                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                                          textAlign: TextAlign.center,
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                  topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                                  rightTitles: AxisTitles(
+                                    sideTitles: SideTitles(
+                                      showTitles: true,
+                                      reservedSize: 40,
+                                      getTitlesWidget: (_, __) => const SizedBox(),
+                                    ),
+                                  ),
+                                ),
+                                borderData: FlBorderData(show: false),
+                                lineBarsData: [
+                                  LineChartBarData(
+                                    spots: List.generate(
+                                      24,
+                                          (i) => FlSpot(i.toDouble(), Random().nextDouble() * 0.25),
+                                    ),
+                                    isCurved: true,
+                                    barWidth: 3,
+                                    color: Colors.black.withOpacity(0.8),
+                                    dotData: FlDotData(show: false),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      const Center(
+                        child: Text(
+                          "시간 (hh:mm)",
+                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
