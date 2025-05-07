@@ -1,6 +1,21 @@
 import 'package:flutter/material.dart';
 import 'drunkenness_screen.dart';
 
+import 'package:flutter/services.dart';
+
+
+const _ch = MethodChannel('com.waithealth/drink');   // 채널 이름
+
+Future<void> _sendDrink(String type) async {
+  final double degree = (type == 'soju') ? 17.0 : 5.0;
+  try {
+    await _ch.invokeMethod('setDrink',
+        {'type': type, 'percent': degree});
+  } on PlatformException catch (e) {
+    print('native 호출 실패: $e');
+  }
+}
+
 class DrinkTypeSelectionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -40,7 +55,9 @@ class DrinkTypeSelectionScreen extends StatelessWidget {
                     context,
                     image: 'assets/soju.png',
                     label: '소주',
-                    onTap: () {
+                    onTap: () async {
+                      await _sendDrink('soju');
+                      if (!context.mounted) return;
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -54,7 +71,9 @@ class DrinkTypeSelectionScreen extends StatelessWidget {
                     context,
                     image: 'assets/beer.png',
                     label: '맥주',
-                    onTap: () {
+                    onTap: () async {
+                      await _sendDrink('beer');
+                      if (!context.mounted) return;
                       Navigator.push(
                         context,
                         MaterialPageRoute(

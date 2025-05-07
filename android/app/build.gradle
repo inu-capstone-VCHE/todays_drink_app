@@ -24,8 +24,8 @@ android {
         applicationId = "com.example.todays_drink"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        minSdk = 26
+        targetSdk = 34
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
@@ -37,8 +37,44 @@ android {
             signingConfig = signingConfigs.debug
         }
     }
+    // ▶ Flutter 가 생성한 소스 포함
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
 }
 
 flutter {
     source = "../.."
+}
+// ────────────────────────────────────────────────
+//  의존성
+// ────────────────────────────────────────────────
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.22"
+
+    /* ─── Wear 통신 ─── */
+    implementation "com.google.android.gms:play-services-wearable:18.1.0"
+
+    /* ─── Health Connect ─── */
+    implementation "androidx.health.connect:connect-client:1.1.0-alpha08"
+
+    /* ─── Retrofit / OkHttp ─── */
+    implementation "com.squareup.retrofit2:retrofit:2.9.0"
+    implementation "com.squareup.retrofit2:converter-gson:2.9.0"
+    implementation "com.squareup.okhttp3:logging-interceptor:4.12.0"
+
+    /* ─── 코루틴 ─── */
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3"
+
+    /* ─── Volley (선택) ─── */
+    implementation "com.android.volley:volley:1.2.1"
+
+    /* ─── Amplify (선택) ─── */
+    implementation 'com.amplifyframework:core:2.9.0'
+    implementation 'com.amplifyframework:aws-api:2.9.0'
+    implementation 'com.amplifyframework:aws-auth-cognito:2.9.0'
+    implementation 'com.amplifyframework:aws-datastore:2.9.0'
+
+    /* ─── 멀티덱스 ─── */
+    implementation "androidx.multidex:multidex:2.0.1"
 }
