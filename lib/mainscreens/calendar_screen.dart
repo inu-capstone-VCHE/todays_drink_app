@@ -438,6 +438,8 @@ class _CalendarScreenState extends State<CalendarScreen>
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        scrolledUnderElevation: 0,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -499,218 +501,216 @@ class _CalendarScreenState extends State<CalendarScreen>
                 AnimatedContainer(
                   duration: Duration(milliseconds: 300),
                   height: _calendarHeight,
-                  child: TableCalendar(
-                    locale: 'ko_KR',
-                    firstDay: DateTime.utc(2020, 1, 1),
-                    lastDay: DateTime.now(),
-                    focusedDay: _focusedDay,
-                    selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-                    calendarFormat: CalendarFormat.month,
-                    rowHeight: _showRecord ? 65 : 80,
-                    onDaySelected: (selectedDay, focusedDay) {
-                      if (selectedDay.isAfter(DateTime.now())) return;
-                      setState(() {
-                        _selectedDay = selectedDay;
-                        _focusedDay = focusedDay;
-                        _toggleRecord(true);
-                      });
-                    },
-                    headerVisible: false,
-                    calendarStyle: CalendarStyle(
-                      defaultTextStyle: TextStyle(
-                        fontFamily: 'NotoSansKR',
-                        fontSize: 16,
-                        color: Colors.black,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 12), // ✅ 상단 여백 추가해서 요일 잘리는 문제 해결
+                    child: TableCalendar(
+                      locale: 'ko_KR',
+                      firstDay: DateTime.utc(2020, 1, 1),
+                      lastDay: DateTime.now(),
+                      focusedDay: _focusedDay,
+                      selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                      calendarFormat: CalendarFormat.month,
+                      rowHeight: _showRecord ? 65 : 80,
+                      daysOfWeekHeight: 24, // ✅ 요일 줄 높이 명시
+
+                      onDaySelected: (selectedDay, focusedDay) {
+                        if (selectedDay.isAfter(DateTime.now())) return;
+                        setState(() {
+                          _selectedDay = selectedDay;
+                          _focusedDay = focusedDay;
+                          _toggleRecord(true);
+                        });
+                      },
+
+                      headerVisible: false,
+                      calendarStyle: CalendarStyle(
+                        defaultTextStyle: TextStyle(
+                          fontFamily: 'NotoSansKR',
+                          fontSize: 16,
+                          color: Colors.black,
+                        ),
+                        weekendTextStyle: TextStyle(
+                          fontFamily: 'NotoSansKR',
+                          fontSize: 16,
+                          color: Colors.black,
+                        ),
+                        outsideTextStyle: TextStyle(
+                          fontFamily: 'NotoSansKR',
+                          fontSize: 16,
+                          color: Colors.grey,
+                        ),
+                        todayDecoration: BoxDecoration(
+                          color: (_selectedDay == null ||
+                              isSameDay(_selectedDay, DateTime.now()))
+                              ? Color(0xFFF2D027)
+                              : Colors.transparent,
+                          shape: BoxShape.circle,
+                        ),
+                        selectedDecoration: BoxDecoration(
+                          color: Color(0xFFF2D027),
+                          shape: BoxShape.circle,
+                        ),
+                        todayTextStyle: TextStyle(
+                          fontFamily: 'NotoSansKR',
+                          color: Colors.black,
+                          fontWeight: FontWeight.normal,
+                        ),
+                        selectedTextStyle: TextStyle(
+                          fontFamily: 'NotoSansKR',
+                          color: Colors.black,
+                          fontWeight: FontWeight.normal,
+                        ),
                       ),
-                      weekendTextStyle: TextStyle(
-                        fontFamily: 'NotoSansKR',
-                        fontSize: 16,
-                        color: Colors.black,
+                      daysOfWeekStyle: DaysOfWeekStyle(
+                        weekdayStyle: TextStyle(
+                          fontFamily: 'NotoSansKR',
+                          color: Colors.black,
+                        ),
+                        weekendStyle: TextStyle(
+                          fontFamily: 'NotoSansKR',
+                          color: Colors.black,
+                        ),
                       ),
-                      outsideTextStyle: TextStyle(
-                        fontFamily: 'NotoSansKR',
-                        fontSize: 16,
-                        color: Colors.grey,
-                      ),
-                      todayDecoration: BoxDecoration(
-                        color: (_selectedDay == null ||
-                            isSameDay(_selectedDay, DateTime.now()))
-                            ? Color(0xFFF2D027)
-                            : Colors.transparent,
-                        shape: BoxShape.circle,
-                      ),
-                      selectedDecoration: BoxDecoration(
-                        color: Color(0xFFF2D027),
-                        shape: BoxShape.circle,
-                      ),
-                      todayTextStyle: TextStyle(
-                        fontFamily: 'NotoSansKR',
-                        color: Colors.black,
-                        fontWeight: FontWeight.normal,
-                      ),
-                      selectedTextStyle: TextStyle(
-                        fontFamily: 'NotoSansKR',
-                        color: Colors.black,
-                        fontWeight: FontWeight.normal,
-                      ),
-                    ),
-                    daysOfWeekStyle: DaysOfWeekStyle(
-                      weekdayStyle: TextStyle(
-                        fontFamily: 'NotoSansKR',
-                        color: Colors.black,
-                      ),
-                      weekendStyle: TextStyle(
-                        fontFamily: 'NotoSansKR',
-                        color: Colors.black,
-                      ),
-                    ),
-                    calendarBuilders: CalendarBuilders(
-                      dowBuilder: (context, day) {
-                        if (day.weekday == DateTime.sunday) {
-                          return Center(
-                            child: Text(
-                              '일',
-                              style: TextStyle(
-                                fontFamily: 'NotoSansKR',
-                                color: Colors.red,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          );
-                        } else if (day.weekday == DateTime.saturday) {
-                          return Center(
+                      calendarBuilders: CalendarBuilders(
+                        dowBuilder: (context, day) {
+                          if (day.weekday == DateTime.sunday) {
+                            return Center(
                               child: Text(
-                                  '토',
-                                  style: TextStyle(
-                                    fontFamily: 'NotoSansKR',
-                                    color: Colors.blue,
-                                    fontWeight: FontWeight.bold,
-                                  )
-                              )
-                          );
-                        }
-                        return null;
-                      },
-                      defaultBuilder: (context, day, focusedDay) {
-                        final isFuture = day.isAfter(DateTime.now()); // 미래 날짜 확인
-                        final isSunday = day.weekday == DateTime.sunday;
-                        final isSaturday = day.weekday == DateTime.saturday;
-                        final dateKey = "${day.year}-${day.month}-${day.day}";
-                        final hasRecord = drinkingRecords.containsKey(dateKey);
-
-                        return Center(
-                          child: Text(
-                            '${day.day}',
-                            style: TextStyle(
-                              fontFamily: 'NotoSansKR',
-                              fontSize: 16,
-                              fontWeight: FontWeight.normal,
-                              color: hasRecord
-                                  ? Colors.transparent
-                                  : isFuture
-                                  ? Colors.grey
-                                  : isSunday
-                                  ? Colors.red
-                                  : isSaturday
-                                  ? Colors.blue
-                                  : Colors.black,
-                            ),
-                          ),
-                        );
-                      },
-
-                      outsideBuilder: (context, day, focusedDay) {
-                        final dateKey = "${day.year}-${day.month}-${day.day}";
-                        final hasRecord = drinkingRecords.containsKey(dateKey);
-
-                        return Center(
-                          child: Text(
-                            '${day.day}',
-                            style: TextStyle(
-                              fontFamily: 'NotoSansKR',
-                              fontSize: 16,
-                              fontWeight: FontWeight.normal,
-                              color: hasRecord ? Colors.transparent : Colors.grey,
-                            ),
-                          ),
-                        );
-                      },
-
-                      markerBuilder: (context, day, events) {
-                        String dateKey = "${day.year}-${day.month}-${day.day}";
-
-                        if (drinkingRecords.containsKey(dateKey)) {
-                          final record = drinkingRecords[dateKey]!;
-
-                          for (var r in record) {
-                            print("✅ $dateKey / title: ${r.title}, soju: ${r.sojuAmount}, beer: ${r.beerAmount}");
+                                '일',
+                                style: TextStyle(
+                                  fontFamily: 'NotoSansKR',
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            );
+                          } else if (day.weekday == DateTime.saturday) {
+                            return Center(
+                              child: Text(
+                                '토',
+                                style: TextStyle(
+                                  fontFamily: 'NotoSansKR',
+                                  color: Colors.blue,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            );
                           }
-
-                          String assetPath;
-
-                          final drankSoju = record.any((r) => r.sojuAmount > 0);
-                          final drankBeer = record.any((r) => r.beerAmount > 0);
-
-
-                          if (drankSoju && drankBeer) {
-                            final seed = day.year * 10000 + day.month * 100 + day.day;
-                            final isSoju = Random(seed).nextBool();
-                            assetPath = isSoju ? "assets/soju.png" : "assets/beer.png";
-                          } else if (drankSoju) {
-                            assetPath = "assets/soju.png";
-                          } else if (drankBeer) {
-                            assetPath = "assets/beer.png";
-                          } else {
-                            return null; // 둘 다 안 마셨으면 표시 안 함
-                          }
+                          return null;
+                        },
+                        defaultBuilder: (context, day, focusedDay) {
+                          final isFuture = day.isAfter(DateTime.now());
+                          final isSunday = day.weekday == DateTime.sunday;
+                          final isSaturday = day.weekday == DateTime.saturday;
+                          final dateKey = "${day.year}-${day.month}-${day.day}";
+                          final hasRecord = drinkingRecords.containsKey(dateKey);
 
                           return Center(
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                Container(
-                                  width: 32,
-                                  height: 32,
-                                ),
-                                Image.asset(
-                                  assetPath,
-                                  width: 40,
-                                  height: 40,
-                                ),
-                              ],
-                            ),
-                          );
-                        }
-                        return null;
-                      },
-                      selectedBuilder: (context, day, focusedDay) {
-                        final dateKey = "${day.year}-${day.month}-${day.day}";
-                        final hasRecord = drinkingRecords.containsKey(dateKey);
-
-                        return Center(
-                          child: Container(
-                            width: 44, // ✅ 기본 선택 원 크기 맞춤
-                            height: 44,
-                            decoration: BoxDecoration(
-                              color: Color(0xFFF2D027),
-                              shape: BoxShape.circle,
-                            ),
-                            alignment: Alignment.center,
                             child: Text(
                               '${day.day}',
                               style: TextStyle(
                                 fontFamily: 'NotoSansKR',
                                 fontSize: 16,
                                 fontWeight: FontWeight.normal,
-                                color: hasRecord ? Colors.transparent : Colors.black,
+                                color: hasRecord
+                                    ? Colors.transparent
+                                    : isFuture
+                                    ? Colors.grey
+                                    : isSunday
+                                    ? Colors.red
+                                    : isSaturday
+                                    ? Colors.blue
+                                    : Colors.black,
                               ),
                             ),
-                          ),
-                        );
-                      },
+                          );
+                        },
+                        outsideBuilder: (context, day, focusedDay) {
+                          final dateKey = "${day.year}-${day.month}-${day.day}";
+                          final hasRecord = drinkingRecords.containsKey(dateKey);
+
+                          return Center(
+                            child: Text(
+                              '${day.day}',
+                              style: TextStyle(
+                                fontFamily: 'NotoSansKR',
+                                fontSize: 16,
+                                fontWeight: FontWeight.normal,
+                                color: hasRecord ? Colors.transparent : Colors.grey,
+                              ),
+                            ),
+                          );
+                        },
+                        markerBuilder: (context, day, events) {
+                          String dateKey = "${day.year}-${day.month}-${day.day}";
+
+                          if (drinkingRecords.containsKey(dateKey)) {
+                            final record = drinkingRecords[dateKey]!;
+
+                            String assetPath;
+                            final drankSoju = record.any((r) => r.sojuAmount > 0);
+                            final drankBeer = record.any((r) => r.beerAmount > 0);
+
+                            if (drankSoju && drankBeer) {
+                              final seed = day.year * 10000 + day.month * 100 + day.day;
+                              final isSoju = Random(seed).nextBool();
+                              assetPath = isSoju ? "assets/soju.png" : "assets/beer.png";
+                            } else if (drankSoju) {
+                              assetPath = "assets/soju.png";
+                            } else if (drankBeer) {
+                              assetPath = "assets/beer.png";
+                            } else {
+                              return null;
+                            }
+
+                            return Center(
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  Container(
+                                    width: 32,
+                                    height: 32,
+                                  ),
+                                  Image.asset(
+                                    assetPath,
+                                    width: 40,
+                                    height: 40,
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+                          return null;
+                        },
+                        selectedBuilder: (context, day, focusedDay) {
+                          final dateKey = "${day.year}-${day.month}-${day.day}";
+                          final hasRecord = drinkingRecords.containsKey(dateKey);
+
+                          return Center(
+                            child: Container(
+                              width: 44,
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: Color(0xFFF2D027),
+                                shape: BoxShape.circle,
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                '${day.day}',
+                                style: TextStyle(
+                                  fontFamily: 'NotoSansKR',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.normal,
+                                  color: hasRecord ? Colors.transparent : Colors.black,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ),
-                ),
+                )
               ],
             ),
             if (_showRecord)

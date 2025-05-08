@@ -116,8 +116,10 @@ class _PledgeScreenState extends State<PledgeScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+
+      // ✅ 스크롤 가능한 영역
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -166,7 +168,8 @@ class _PledgeScreenState extends State<PledgeScreen> {
                       isDense: true,
                       contentPadding: EdgeInsets.symmetric(vertical: 8),
                       border: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Color(0xFFF2D027), width: 2),),
+                        borderSide: BorderSide(color: Color(0xFFF2D027), width: 2),
+                      ),
                       enabledBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: Color(0xFFF2D027), width: 2),
                       ),
@@ -189,27 +192,31 @@ class _PledgeScreenState extends State<PledgeScreen> {
                 Image.asset('assets/seal.png', height: 45),
               ],
             ),
-            const Spacer(),
-            SizedBox(
-              height: 50,
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: isFilled ? const Color(0xFF2E7B8C) : Colors.grey[300],
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                onPressed: isFilled ? submitPledge : null,
-                child: const Text(
-                  '완료',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 100), // 키보드 겹침 방지용 여유 공간
           ],
+        ),
+      ),
+
+      // ✅ 고정 버튼
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+        child: SizedBox(
+          height: 50,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: isFilled ? const Color(0xFF2E7B8C) : Colors.grey[300],
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: isFilled ? submitPledge : null,
+            child: const Text(
+              '완료',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+            ),
+          ),
         ),
       ),
     );
   }
+
 }

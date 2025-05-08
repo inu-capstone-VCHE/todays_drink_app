@@ -34,8 +34,6 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -54,45 +52,59 @@ class _SignupScreenState extends State<SignupScreen> {
         backgroundColor: Colors.white,
       ),
       backgroundColor: Colors.white,
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 20),
 
-            buildTextField(hint: "이름", icon: Icons.person, controller: _nameController),
-            buildTextField(hint: "생년월일", icon: Icons.calendar_today, controller: _birthController),
-            buildTextField(hint: "이메일", icon: Icons.email, controller: _emailController),
+      // ✅ 스크롤 가능한 입력 필드들
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              buildTextField(hint: "이름", icon: Icons.person, controller: _nameController),
+              buildTextField(hint: "생년월일", icon: Icons.calendar_today, controller: _birthController),
+              buildTextField(hint: "이메일", icon: Icons.email, controller: _emailController),
 
-            buildPasswordField(hint: "비밀번호", isVisible: _passwordVisible, controller: _passwordController, toggle: () {
-              setState(() => _passwordVisible = !_passwordVisible);
-            }),
-            buildPasswordField(hint: "비밀번호 확인", isVisible: _confirmPasswordVisible, controller: _confirmPasswordController, toggle: () {
-              setState(() => _confirmPasswordVisible = !_confirmPasswordVisible);
-            }),
-
-            buildTextField(hint: "닉네임", icon: Icons.person, controller: _nicknameController),
-
-            const Spacer(),
-
-            SizedBox(
-              width: screenWidth,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: signupUser,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2D6876),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-                child: const Text(
-                  "회원가입 완료",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: Colors.white),
-                ),
+              buildPasswordField(
+                hint: "비밀번호",
+                isVisible: _passwordVisible,
+                controller: _passwordController,
+                toggle: () {
+                  setState(() => _passwordVisible = !_passwordVisible);
+                },
               ),
+              buildPasswordField(
+                hint: "비밀번호 확인",
+                isVisible: _confirmPasswordVisible,
+                controller: _confirmPasswordController,
+                toggle: () {
+                  setState(() => _confirmPasswordVisible = !_confirmPasswordVisible);
+                },
+              ),
+
+              buildTextField(hint: "닉네임", icon: Icons.person, controller: _nicknameController),
+
+              const SizedBox(height: 100), // 키보드 겹침 방지용 여유
+            ],
+          ),
+        ),
+      ),
+
+      // ✅ 하단 고정 버튼
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
+        child: SizedBox(
+          height: 50,
+          child: ElevatedButton(
+            onPressed: signupUser,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF2D6876),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
-            const SizedBox(height: 20),
-          ],
+            child: const Text(
+              "회원가입 완료",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: Colors.white),
+            ),
+          ),
         ),
       ),
     );
@@ -113,7 +125,12 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  Widget buildPasswordField({required String hint, required bool isVisible, required TextEditingController controller, required VoidCallback toggle}) {
+  Widget buildPasswordField({
+    required String hint,
+    required bool isVisible,
+    required TextEditingController controller,
+    required VoidCallback toggle,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20.0),
       child: TextField(
