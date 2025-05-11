@@ -105,7 +105,45 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
     }
   }
 
-  double bac = 0.15;
+  double bac = 0.08;
+
+  final List<FlSpot> previousBAC = [
+    FlSpot(0, 0.02),
+    FlSpot(1, 0.03),
+    FlSpot(2, 0.03),
+    FlSpot(3, 0.05),
+    FlSpot(4, 0.08),
+    FlSpot(5, 0.07),
+    FlSpot(6, 0.08),
+    FlSpot(7, 0.09),
+    FlSpot(8, 0.11),
+    FlSpot(9, 0.124),
+    FlSpot(10, 0.122),
+    FlSpot(11, 0.127),
+    FlSpot(12, 0.131),
+    FlSpot(13, 0.134),
+    FlSpot(14, 0.135),
+    FlSpot(15, 0.140),
+  ];
+
+  final List<FlSpot> currentBAC = [
+    FlSpot(0, 0.010),
+    FlSpot(1, 0.028),
+    FlSpot(2, 0.045),
+    FlSpot(3, 0.045),
+    FlSpot(4, 0.075),
+    FlSpot(5, 0.079),
+    FlSpot(6, 0.085),
+    FlSpot(7, 0.110),
+    FlSpot(8, 0.125),
+    FlSpot(9, 0.124),
+    FlSpot(10, 0.126),
+    FlSpot(11, 0.129),
+    FlSpot(12, 0.120),
+    FlSpot(13, 0.130),
+    FlSpot(14, 0.132),
+    FlSpot(15, 0.138),
+  ];
 
   @override
   void initState() {
@@ -278,7 +316,7 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
           Align(
             alignment: Alignment.topLeft,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 80, 24, 0),
+              padding: const EdgeInsets.fromLTRB(24, 10, 24, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
@@ -317,7 +355,7 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
                   ),
                   SizedBox(height: 30),
                   Text(
-                    "_ 잔 마시는 중 🍸",
+                    "8 잔 마시는 중 🍸",
                     style: TextStyle(
                       fontFamily: 'NotoSansKR',
                       fontSize: 30,
@@ -331,7 +369,7 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Padding(
-                        padding: EdgeInsets.only(left: 8.0, bottom: 4.0),
+                        padding: EdgeInsets.only(left: 0.0, bottom: 4.0),
                         child: Text(
                           "BAC (%)",
                           style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
@@ -340,10 +378,10 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
                       SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                         child: Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                          padding: const EdgeInsets.only(top: 24.0),
                           child: SizedBox(
                             width: 1000,
-                            height: 250,
+                            height: 270,
                             child: LineChart(
                               LineChartData(
                                 minY: 0.0,
@@ -356,52 +394,55 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
                                       showTitles: true,
                                       interval: 1,
                                       getTitlesWidget: (value, _) {
-                                        final minutes = (value.toInt() * 5);
-                                        final hour = minutes ~/ 60;
-                                        final minute = minutes % 60;
-                                        final label = "${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}";
-                                        return Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500));
+                                        int minutes = value.toInt() * 5;
+                                        int hour = minutes ~/ 60;
+                                        int minute = minutes % 60;
+                                        return Padding(
+                                          padding: const EdgeInsets.only(top: 4),
+                                          child: Text(
+                                            '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}',
+                                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+                                          ),
+                                        );
                                       },
                                     ),
                                   ),
                                   leftTitles: AxisTitles(
                                     sideTitles: SideTitles(
                                       showTitles: true,
-                                      reservedSize: 40,
+                                      reservedSize: 42,
                                       interval: 0.05,
-                                      getTitlesWidget: (value, _) {
-                                        return Text(
+                                      getTitlesWidget: (value, _) => Padding(
+                                        padding: const EdgeInsets.only(right: 4),
+                                        child: Text(
                                           value.toStringAsFixed(3),
-                                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-                                          textAlign: TextAlign.center,
-                                        );
-                                      },
+                                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+                                        ),
+                                      ),
                                     ),
                                   ),
                                   topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                                  rightTitles: AxisTitles(
-                                    sideTitles: SideTitles(
-                                      showTitles: true,
-                                      reservedSize: 40,
-                                      getTitlesWidget: (_, __) => const SizedBox(),
-                                    ),
-                                  ),
+                                  rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
                                 ),
                                 borderData: FlBorderData(show: false),
                                 lineBarsData: [
                                   LineChartBarData(
-                                    spots: List.generate(
-                                      24,
-                                          (i) => FlSpot(i.toDouble(), Random().nextDouble() * 0.25),
-                                    ),
-                                    isCurved: true,
+                                    spots: previousBAC,
+                                    isCurved: false,
                                     barWidth: 3,
-                                    color: Colors.black.withOpacity(0.8),
+                                    color: Colors.blue, // 직전 측정 그래프 색
+                                    dotData: FlDotData(show: false),
+                                  ),
+                                  LineChartBarData(
+                                    spots: currentBAC,
+                                    isCurved: false,
+                                    barWidth: 3,
+                                    color: Color(0xFFFE8989), // 현재 측정 그래프 색
                                     dotData: FlDotData(show: false),
                                   ),
                                 ],
                               ),
-                            ),
+                            )
                           ),
                         ),
                       ),
@@ -411,6 +452,29 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
                           "시간 (hh:mm)",
                           style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                         ),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // 현재 측정
+                          Container(width: 20, height: 4, color: Color(0xFFFE8989)),
+                          SizedBox(width: 6),
+                          Text(
+                            "현재 BAC 변화량",
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                          ),
+
+                          SizedBox(width: 16),
+
+                          // 직전 측정
+                          Container(width: 20, height: 4, color: Colors.blue),
+                          SizedBox(width: 6),
+                          Text(
+                            "직전 BAC 변화량",
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                          ),
+                        ],
                       ),
                     ],
                   ),
