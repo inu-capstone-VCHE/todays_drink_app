@@ -77,12 +77,13 @@ class _InputInformationScreenState extends State<InputInformationScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+
+      // ✅ 스크롤 가능한 본문
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SizedBox(height: 16),
             const Text('당신의 성별은?',
                 style: TextStyle(
                     fontFamily: 'NotoSansKR',
@@ -238,40 +239,44 @@ class _InputInformationScreenState extends State<InputInformationScreen> {
                 ],
               ),
             ),
-            const Spacer(),
-            SizedBox(
-              height: 50,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: (gender != null && isHeightEntered && isWeightEntered)
-                      ? const Color(0xFF2E7B8C)
-                      : Colors.grey[300],
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            const SizedBox(height: 100), // 여유 공간
+          ],
+        ),
+      ),
+
+      // ✅ 하단 고정 버튼
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+        child: SizedBox(
+          height: 50,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: (gender != null && isHeightEntered && isWeightEntered)
+                  ? const Color(0xFF2E7B8C)
+                  : Colors.grey[300],
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: isAllInfoEntered
+                ? () async {
+              await saveUserInfo(); // 서버에 정보 저장
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => AlcoholAmountScreen(),
                 ),
-                onPressed: isAllInfoEntered
-                    ? () async {
-                  await saveUserInfo(); // 서버에 정보 저장
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => AlcoholAmountScreen(),
-                    ),
-                  );
-                }
-                    : null,
-                child: const Text(
-                  '계속하기',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontFamily: "NotoSansKR",
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
+              );
+            }
+                : null,
+            child: const Text(
+              '계속하기',
+              style: TextStyle(
+                fontSize: 16,
+                fontFamily: "NotoSansKR",
+                fontWeight: FontWeight.w700,
               ),
             ),
-            const SizedBox(height: 24),
-          ],
+          ),
         ),
       ),
     );

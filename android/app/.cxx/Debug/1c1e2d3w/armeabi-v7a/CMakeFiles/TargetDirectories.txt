@@ -1,0 +1,2 @@
+C:/Users/shito/AndroidStudioProjects/todays_drink_app/android/app/.cxx/Debug/1c1e2d3w/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/shito/AndroidStudioProjects/todays_drink_app/android/app/.cxx/Debug/1c1e2d3w/armeabi-v7a/CMakeFiles/rebuild_cache.dir

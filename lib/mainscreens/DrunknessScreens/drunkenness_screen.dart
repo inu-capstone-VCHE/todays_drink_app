@@ -2,6 +2,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:todays_drink/mainscreens/calendar_screen.dart';
+import 'package:flutter/services.dart';
+
+const _ch = MethodChannel('com.waithealth/drink');
 
 // 단계별 데이터 구조
 class DrunkennessStageData {
@@ -84,6 +87,8 @@ class DrunkennessScreen extends StatefulWidget {
 }
 
 class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTickerProviderStateMixin {
+  int _drinkCount = 0;      // 처음 0으로 시작
+
   late AnimationController _animationController;
   int drunkennessLevel = 4;
 
@@ -114,11 +119,25 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
     }
   }
 
-  double bac = 0.04;
+  double bac = 0.001; // BAC 수치 초기화
 
   @override
   void initState() {
     super.initState();
+
+    _ch.setMethodCallHandler((call) async {
+          if (call.method == 'drinkCount') {
+            setState(() => _drinkCount = call.arguments as int);
+          }
+           if (call.method == 'bacUpdate') {
+      setState(() {
+        bac = (call.arguments as num).toDouble();
+        drunkennessLevel = getDrunkennessLevel(bac);
+        stage = stageDataMap[drunkennessLevel]!;
+      });
+    }
+        });
+        
 
     drunkennessLevel = getDrunkennessLevel(bac);
     stage = stageDataMap[drunkennessLevel]!;
@@ -328,7 +347,7 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
                   ),
                   SizedBox(height: 30),
                   Text(
-                    "_ 잔 마시는 중 🍸",
+                    "$_drinkCount 잔 마시는 중 🍸",
                     style: TextStyle(
                       fontFamily: 'NotoSansKR',
                       fontSize: 30,
