@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:todays_drink/mainscreens/calendar_screen.dart';
 import 'package:flutter/services.dart';
+import 'package:fl_chart/fl_chart.dart';
+import 'dart:async';   // ⬅️ Timer 를 쓰려면 필요
 
 const _ch = MethodChannel('com.waithealth/drink');
 
@@ -87,6 +89,8 @@ class DrunkennessScreen extends StatefulWidget {
 }
 
 class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTickerProviderStateMixin {
+  Timer? _periodicTimer; // Timer 객체를 선언합니다.
+
   int _drinkCount = 0;      // 처음 0으로 시작
 
   late AnimationController _animationController;
@@ -119,11 +123,53 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
     }
   }
 
+  final List<FlSpot> _previousBac = [];      // “직전 측정” (원하면 서버에서 받아서 넣어두세요)
+  final List<FlSpot> _currentBac = [];       // 이번 측정에서 쌓일 값
+
+  late DateTime _sessionStart;               // x축(경과 시간) 계산용
   double bac = 0.001; // BAC 수치 초기화
+  final List<FlSpot> previousBAC = [
+    FlSpot(0, 0.02),
+    FlSpot(1, 0.03),
+    FlSpot(2, 0.03),
+    FlSpot(3, 0.05),
+    FlSpot(4, 0.08),
+    FlSpot(5, 0.07),
+    FlSpot(6, 0.08),
+    FlSpot(7, 0.09),
+    FlSpot(8, 0.11),
+    FlSpot(9, 0.124),
+    FlSpot(10, 0.122),
+    FlSpot(11, 0.127),
+    FlSpot(12, 0.131),
+    FlSpot(13, 0.134),
+    FlSpot(14, 0.135),
+    FlSpot(15, 0.140),
+  ];
+  final List<FlSpot> currentBAC = [
+    FlSpot(0, 0.010),
+    FlSpot(1, 0.028),
+    FlSpot(2, 0.045),
+    FlSpot(3, 0.045),
+    FlSpot(4, 0.075),
+    FlSpot(5, 0.079),
+    FlSpot(6, 0.085),
+    FlSpot(7, 0.110),
+    FlSpot(8, 0.125),
+    FlSpot(9, 0.124),
+    FlSpot(10, 0.126),
+    FlSpot(11, 0.129),
+    FlSpot(12, 0.120),
+    FlSpot(13, 0.130),
+    FlSpot(14, 0.132),
+    FlSpot(15, 0.138),
+  ];
 
   @override
   void initState() {
     super.initState();
+    
+    _sessionStart = DateTime.now();          // ★ 측정 시작 시각 기록
 
     _ch.setMethodCallHandler((call) async {
           if (call.method == 'drinkCount') {
@@ -132,12 +178,23 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
            if (call.method == 'bacUpdate') {
       setState(() {
         bac = (call.arguments as num).toDouble();
-        drunkennessLevel = getDrunkennessLevel(bac);
-        stage = stageDataMap[drunkennessLevel]!;
       });
     }
         });
+
+        // ▼ 5 분마다 한 번씩 ‘pull’ 호출
+    _periodicTimer = Timer.periodic(const Duration(minutes: 5), (_) async {
+      try {
+        // 네이티브에서 최신 BAC 한 번 가져오기
+        final num latest = await _ch.invokeMethod('getLatestBac');
+        _applyNewBac(latest.toDouble());
+      } on PlatformException catch (e) {
+        debugPrint('getLatestBac 실패: $e');
+      }
+    });
+
         
+    
 
     drunkennessLevel = getDrunkennessLevel(bac);
     stage = stageDataMap[drunkennessLevel]!;
@@ -148,8 +205,23 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
     )..repeat();
   }
 
+// BAC 적용 → 단계-색·메시지 갱신
+  void _applyNewBac(double newBac) {
+  final minutes =
+      DateTime.now().difference(_sessionStart).inMinutes.toDouble();
+    setState(() {
+      bac = newBac;
+      drunkennessLevel = getDrunkennessLevel(bac);
+      stage = stageDataMap[drunkennessLevel]!;
+
+    _currentBac.add(FlSpot(minutes, bac));   // ★ 그래프 데이터 쌓기
+    // 200점 정도까지만 유지 (메모리·성능 보호)
+    if (_currentBac.length > 200) _currentBac.removeAt(0);
+    });
+  }
   @override
   void dispose() {
+    _periodicTimer?.cancel();   // ⬅️ 타이머 해제
     _animationController.dispose();
     super.dispose();
   }
@@ -336,12 +408,12 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
                   ),
                   SizedBox(height: 10),
                   Text(
-                    stage.messages[0],
+                    "※ 위 수치는 추정치일 뿐 사람마다 개인차가 있을 수 있음.",
                     style: TextStyle(
                       fontFamily: 'NotoSansKR',
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey[800],
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[700],
                     ),
                     textAlign: TextAlign.left,
                   ),
@@ -356,7 +428,125 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
                     ),
                     textAlign: TextAlign.left,
                   ),
-                  SizedBox(height: 30),
+                  SizedBox(height: 70), 
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.only(left: 0.0, bottom: 4.0),
+                        child: Text(
+                          "BAC (%)",
+                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 24.0),
+                          child: SizedBox(
+                            width: 350,
+                            height: 270,
+                            child: LineChart(
+                              LineChartData(
+                                minY: 0.0,
+                                maxY: 0.25,
+                                minX: 0,
+                                maxX: (_currentBac.isNotEmpty
+                                        ? _currentBac.last.x
+                                        : 1) + 1,                // x축 범위를 최신 값에 맞춰 늘림
+                                backgroundColor: Colors.transparent,
+                                gridData: FlGridData(show: false),
+                                titlesData: FlTitlesData(
+                                  bottomTitles: AxisTitles(
+                                    sideTitles: SideTitles(
+                                      showTitles: true,
+                                      interval: 1,
+                                      getTitlesWidget: (value, _) {
+                                        int minutes = value.toInt() * 5;
+                                        int hour = minutes ~/ 60;
+                                        int minute = minutes % 60;
+                                        return Padding(
+                                          padding: const EdgeInsets.only(top: 4),
+                                          child: Text(
+                                            '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}',
+                                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                  leftTitles: AxisTitles(
+                                    sideTitles: SideTitles(
+                                      showTitles: true,
+                                      reservedSize: 42,
+                                      interval: 0.05,
+                                      getTitlesWidget: (value, _) => Padding(
+                                        padding: const EdgeInsets.only(right: 4),
+                                        child: Text(
+                                          value.toStringAsFixed(3),
+                                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                                  rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                                ),
+                                borderData: FlBorderData(show: false),
+                                lineBarsData: [
+                                  // 직전 측정(있을 때만)
+                                  if (_previousBac.isNotEmpty)
+                                    LineChartBarData(
+                                      spots: _previousBac,
+                                      isCurved: false,
+                                      barWidth: 3,
+                                      color: Colors.blue,
+                                      dotData: FlDotData(show: false),
+                                    ),
+                                  // 이번 측정
+                                  LineChartBarData(
+                                    spots: _currentBac,
+                                    isCurved: false,
+                                    barWidth: 3,
+                                    color: const Color(0xFFFE8989),
+                                    dotData: FlDotData(show: false),
+                                  ),
+                                ],
+                              ),
+                            )
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      const Center(
+                        child: Text(
+                          "시간 (hh:mm)",
+                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // 현재 측정
+                          Container(width: 20, height: 4, color: Color(0xFFFE8989)),
+                          SizedBox(width: 6),
+                          Text(
+                            "현재 BAC 변화량",
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                          ),
+                          SizedBox(width: 16),
+                          // 직전 측정
+                          Container(width: 20, height: 4, color: Colors.blue),
+                          SizedBox(width: 6),
+                          Text(
+                            "직전 BAC 변화량",
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),

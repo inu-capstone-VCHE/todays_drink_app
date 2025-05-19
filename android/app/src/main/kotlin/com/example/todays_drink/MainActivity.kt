@@ -12,6 +12,7 @@ class MainActivity: FlutterActivity(), DataClient.OnDataChangedListener {
     private lateinit var dataClient: DataClient
     private val DATA_PATH = "/drink_count"
     private lateinit var methodChannel: MethodChannel
+    private var bac = 0.00123.toFloat()
     // flutter ⟷ native 브리지
     override fun configureFlutterEngine(engine: FlutterEngine) {
         super.configureFlutterEngine(engine)
@@ -38,7 +39,14 @@ class MainActivity: FlutterActivity(), DataClient.OnDataChangedListener {
 
 
                     result.success(null)          // 플러터에 OK 반환
-                } else {
+                } 
+                
+                if (call.method == "getLatestBac") {
+                    val latestBac = bac
+                    result.success(latestBac)
+                }
+                
+                else {
                     result.notImplemented()
                 }
             }
@@ -58,6 +66,7 @@ class MainActivity: FlutterActivity(), DataClient.OnDataChangedListener {
                 if (ev.dataItem.uri.path == "/bac_info") {
                     val bacF = DataMapItem.fromDataItem(ev.dataItem)
                                       .dataMap.getFloat("bac")
+                    bac = bacF
 
                     methodChannel.invokeMethod("bacUpdate", bacF)    // <-- Flutter 로
 
