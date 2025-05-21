@@ -509,15 +509,14 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
                         child: Padding(
                           padding: const EdgeInsets.only(top: 24.0),
                           child: SizedBox(
-                            width: max(MediaQuery.of(context).size.width - 48, 200),  // 좌우 24씩 패딩 빼주기
+                            width: max(MediaQuery.of(context).size.width, _currentBac.length * 5.0),
                             height: 270,
                             child: LineChart(
                               LineChartData(
                                 minY: 0.0,
                                 maxY: 0.25,
                                 minX: 0,
-                                maxX: (_currentBac.isNotEmpty 
-                                ? _currentBac.last.x : 0) + 1, // x축 범위를 최신 값에 맞춰 늘림
+                                maxX: _currentBac.isNotEmpty ? _currentBac.last.x + 3 : 36,
                                 backgroundColor: Colors.transparent,
                                 gridData: FlGridData(show: false),
                                 titlesData: FlTitlesData(
@@ -526,6 +525,7 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
                                       showTitles: true,
                                       interval: 1,
                                       getTitlesWidget: (value, _) {
+                                        if (value % 5 != 0) return const SizedBox();
                                         int minutes = value.toInt();
                                         int hour = minutes ~/ 60;
                                         int minute = minutes % 60;
@@ -558,7 +558,6 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
                                 ),
                                 borderData: FlBorderData(show: false),
                                 lineBarsData: [
-                                  // 직전 측정(있을 때만)
                                   if (_previousBac.isNotEmpty)
                                     LineChartBarData(
                                       spots: _previousBac,
@@ -567,7 +566,6 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
                                       color: Colors.blue,
                                       dotData: FlDotData(show: false),
                                     ),
-                                  // 이번 측정
                                   LineChartBarData(
                                     spots: _currentBac,
                                     isCurved: false,
@@ -577,7 +575,7 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
                                   ),
                                 ],
                               ),
-                            )
+                            ),
                           ),
                         ),
                       ),
