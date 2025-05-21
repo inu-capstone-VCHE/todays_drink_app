@@ -183,7 +183,7 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
         });
 
         // ▼ 5 분마다 한 번씩 ‘pull’ 호출
-    _periodicTimer = Timer.periodic(const Duration(minutes: 5), (_) async {
+    _periodicTimer = Timer.periodic(const Duration(minutes: 1), (_) async {
       try {
         // 네이티브에서 최신 BAC 한 번 가져오기
         final num latest = await _ch.invokeMethod('getLatestBac');
@@ -192,7 +192,7 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
         debugPrint('getLatestBac 실패: $e');
       }
     });
-
+    _currentBac.add(FlSpot(0, bac));   // ★ 그래프 데이터 쌓기
         
     
 
@@ -380,7 +380,7 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
           Align(
             alignment: Alignment.topLeft,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 80, 24, 0),
+              padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
@@ -406,7 +406,7 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
                     ),
                     textAlign: TextAlign.left,
                   ),
-                  SizedBox(height: 10),
+                  SizedBox(height: 7),
                   Text(
                     "※ 위 수치는 추정치일 뿐 사람마다 개인차가 있을 수 있음.",
                     style: TextStyle(
@@ -417,7 +417,7 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
                     ),
                     textAlign: TextAlign.left,
                   ),
-                  SizedBox(height: 30),
+                  SizedBox(height: 20),
                   Text(
                     "$_drinkCount 잔 마시는 중 🍸",
                     style: TextStyle(
@@ -428,7 +428,7 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
                     ),
                     textAlign: TextAlign.left,
                   ),
-                  SizedBox(height: 70), 
+                  SizedBox(height: 25), 
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -444,16 +444,15 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
                         child: Padding(
                           padding: const EdgeInsets.only(top: 24.0),
                           child: SizedBox(
-                            width: 350,
+                            width: max(MediaQuery.of(context).size.width - 48, 200),  // 좌우 24씩 패딩 빼주기
                             height: 270,
                             child: LineChart(
                               LineChartData(
                                 minY: 0.0,
                                 maxY: 0.25,
                                 minX: 0,
-                                maxX: (_currentBac.isNotEmpty
-                                        ? _currentBac.last.x
-                                        : 1) + 1,                // x축 범위를 최신 값에 맞춰 늘림
+                                maxX: (_currentBac.isNotEmpty 
+                                ? _currentBac.last.x : 0) + 1, // x축 범위를 최신 값에 맞춰 늘림
                                 backgroundColor: Colors.transparent,
                                 gridData: FlGridData(show: false),
                                 titlesData: FlTitlesData(
@@ -462,7 +461,7 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
                                       showTitles: true,
                                       interval: 1,
                                       getTitlesWidget: (value, _) {
-                                        int minutes = value.toInt() * 5;
+                                        int minutes = value.toInt();
                                         int hour = minutes ~/ 60;
                                         int minute = minutes % 60;
                                         return Padding(
