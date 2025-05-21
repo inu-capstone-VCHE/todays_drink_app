@@ -4,18 +4,13 @@ import 'dart:ui';
 import 'package:todays_drink/mainscreens/calendar_screen.dart';
 import 'package:flutter/services.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'dart:async';   // ⬅️ Timer 를 쓰려면 필요
+import 'dart:async';
+import 'package:provider/provider.dart';
+import 'package:todays_drink/providers/profile_provider.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 const _ch = MethodChannel('com.waithealth/drink');
-
-// 단계별 데이터 구조
-class DrunkennessStageData {
-  final List<String> messages;
-
-  DrunkennessStageData({
-    required this.messages,
-  });
-}
 
 // 물결 애니메이션
 class WavePainter extends CustomPainter {
@@ -96,16 +91,6 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
   late AnimationController _animationController;
   int drunkennessLevel = 4;
 
-  late DrunkennessStageData stage;
-
-  final Map<int, DrunkennessStageData> stageDataMap = {
-    1: DrunkennessStageData(messages: ["1단계 메세지"]),
-    2: DrunkennessStageData(messages: ["2단계 메세지"]),
-    3: DrunkennessStageData(messages: ["3단계 메세지"]),
-    4: DrunkennessStageData(messages: ["4단계 메세지"]),
-    5: DrunkennessStageData(messages: ["5단계 메세지"]),
-  };
-
   double getBaseYRatio(int level) {
     switch (level) {
       case 1:
@@ -128,42 +113,117 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
 
   late DateTime _sessionStart;               // x축(경과 시간) 계산용
   double bac = 0.001; // BAC 수치 초기화
-  final List<FlSpot> previousBAC = [
-    FlSpot(0, 0.02),
-    FlSpot(1, 0.03),
-    FlSpot(2, 0.03),
-    FlSpot(3, 0.05),
-    FlSpot(4, 0.08),
-    FlSpot(5, 0.07),
-    FlSpot(6, 0.08),
-    FlSpot(7, 0.09),
-    FlSpot(8, 0.11),
-    FlSpot(9, 0.124),
-    FlSpot(10, 0.122),
-    FlSpot(11, 0.127),
-    FlSpot(12, 0.131),
-    FlSpot(13, 0.134),
-    FlSpot(14, 0.135),
-    FlSpot(15, 0.140),
-  ];
-  final List<FlSpot> currentBAC = [
-    FlSpot(0, 0.010),
-    FlSpot(1, 0.028),
-    FlSpot(2, 0.045),
-    FlSpot(3, 0.045),
-    FlSpot(4, 0.075),
-    FlSpot(5, 0.079),
-    FlSpot(6, 0.085),
-    FlSpot(7, 0.110),
-    FlSpot(8, 0.125),
-    FlSpot(9, 0.124),
-    FlSpot(10, 0.126),
-    FlSpot(11, 0.129),
-    FlSpot(12, 0.120),
-    FlSpot(13, 0.130),
-    FlSpot(14, 0.132),
-    FlSpot(15, 0.138),
-  ];
+
+  Future<void> _saveDrunkennessData(String title) async {
+    final accessToken = Provider.of<ProfileProvider>(context, listen: false).accessToken;
+    final now = DateTime.now();
+    final dateStr = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+
+    final response = await http.post(
+      Uri.parse('http://54.180.90.1:8080/calender/'),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        "date": dateStr,
+        "title": title,
+        "type": widget.drinkType,   // "soju" or "beer"
+        "unit": "잔",
+        "count": _drinkCount.toString(),
+      }),
+    );
+
+    print("📡 보내는 값: ${{
+      "date": dateStr,
+      "title": title,
+      "type": widget.drinkType,
+      "unit": "잔",
+      "count": _drinkCount.toString(),
+    }}");
+
+    if (response.statusCode == 200) {
+      print("✅ 저장 성공");
+    } else {
+      print("❌ 저장 실패: ${response.statusCode} / ${response.body}");
+    }
+  }
+
+  Future<String?> _showTitleInputDialog(BuildContext context) {
+    final controller = TextEditingController();
+
+    return showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          backgroundColor: Colors.white,
+          child: Container(
+            width: 400,
+            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "기록 제목 입력",
+                  style: TextStyle(
+                    fontFamily: "NotoSansKR",
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 20),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.3),
+                        blurRadius: 5,
+                        spreadRadius: 1,
+                      ),
+                    ],
+                  ),
+                  child: TextField(
+                    controller: controller,
+                    maxLength: 20,
+                    decoration: InputDecoration(
+                      hintText: "오늘의 기록",
+                      hintStyle: TextStyle(color: Colors.grey[400]),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                      border: InputBorder.none,
+                      counterText: "",
+                    ),
+                  ),
+                ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context, controller.text);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    minimumSize: Size(double.infinity, 48),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  child: Text(
+                    "저장",
+                    style: TextStyle(
+                      fontFamily: "NotoSansKR",
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   @override
   void initState() {
@@ -197,7 +257,6 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
     
 
     drunkennessLevel = getDrunkennessLevel(bac);
-    stage = stageDataMap[drunkennessLevel]!;
 
     _animationController = AnimationController(
       vsync: this,
@@ -212,7 +271,6 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
     setState(() {
       bac = newBac;
       drunkennessLevel = getDrunkennessLevel(bac);
-      stage = stageDataMap[drunkennessLevel]!;
 
     _currentBac.add(FlSpot(minutes, bac));   // ★ 그래프 데이터 쌓기
     // 200점 정도까지만 유지 (메모리·성능 보호)
@@ -306,14 +364,21 @@ class _DrunkennessScreenState extends State<DrunkennessScreen> with SingleTicker
                                 const SizedBox(width: 16),
                                 Expanded(
                                   child: ElevatedButton(
-                                    onPressed: () {
-                                      Navigator.pop(context); // 다이얼로그 닫기
-                                      // _saveDrunkennessData();
-                                      Navigator.pushAndRemoveUntil(
-                                        context,
-                                        MaterialPageRoute(builder: (_) => CalendarScreen()),
-                                            (route) => false,
-                                      );
+                                    onPressed: () async {
+                                      final title = await _showTitleInputDialog(context);
+
+                                      if (title != null && title.isNotEmpty) {
+                                        await _saveDrunkennessData(title);
+
+                                        if (!mounted) return;
+
+                                        Navigator.pop(context); // 다이얼로그 닫기
+                                        Navigator.pushAndRemoveUntil(
+                                          context,
+                                          MaterialPageRoute(builder: (_) => CalendarScreen()),
+                                              (route) => false,
+                                        );
+                                      }
                                     },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: Colors.grey[850],

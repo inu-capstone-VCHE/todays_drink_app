@@ -35,39 +35,48 @@ class _LoginDefaultScreenState extends State<LoginDefaultScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
+        centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
         elevation: 0,
+        title: const Text(
+          "로그인",
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Center(
-              child: Text(
-                "로그인",
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-            ),
             const SizedBox(height: 40),
 
             const Text("이메일", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
             const SizedBox(height: 8),
             TextField(
               controller: _emailController,
+              cursorColor: Color(0xFF2E7B8C),
               decoration: InputDecoration(
                 hintText: "이메일을 입력해주세요.",
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: Color(0xFF2E7B8C)),
                 ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: Colors.grey.shade600, width: 1.2),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: Color(0xFF2E7B8C), width: 2),
+                ),
               ),
             ),
 
@@ -78,15 +87,23 @@ class _LoginDefaultScreenState extends State<LoginDefaultScreen> {
             TextField(
               controller: _passwordController,
               obscureText: !_passwordVisible,
+              cursorColor: Color(0xFF2E7B8C),
               decoration: InputDecoration(
                 hintText: "비밀번호를 입력해주세요.",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: Colors.grey.shade600, width: 1.2),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: Color(0xFF2E7B8C), width: 2),
+                ),
                 suffixIcon: IconButton(
                   icon: Icon(
                     _passwordVisible ? Icons.visibility : Icons.visibility_off,
+                    color: Colors.grey,
                   ),
                   onPressed: () {
                     setState(() {
@@ -105,7 +122,7 @@ class _LoginDefaultScreenState extends State<LoginDefaultScreen> {
               child: ElevatedButton(
                 onPressed: _loginUser,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2D6876),
+                  backgroundColor: const Color(0xFF2E7B8C),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
                 child: const Text(
@@ -139,7 +156,7 @@ class _LoginDefaultScreenState extends State<LoginDefaultScreen> {
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF2D6876),
+                          color: Color(0xFF2E7B8C),
                           decoration: TextDecoration.underline,
                         ),
                       ),
@@ -176,48 +193,128 @@ class _LoginDefaultScreenState extends State<LoginDefaultScreen> {
 
         showDialog(
           context: context,
-          builder: (context) => AlertDialog(
+          barrierDismissible: false,
+          builder: (context) => Dialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             backgroundColor: Colors.white,
-            title: const Text('로그인 성공!'),
-            content: const Text('성공적으로 로그인되었습니다.'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  if (isFirstLogin == true) {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => InputInformationScreen(),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    "로그인 성공!",
+                    style: TextStyle(
+                      fontFamily: "NotoSansKR",
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    "성공적으로 로그인되었습니다.",
+                    style: TextStyle(
+                      fontFamily: "NotoSansKR",
+                      fontSize: 15,
+                      fontWeight: FontWeight.w400,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 28),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        if (isFirstLogin == true) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (_) => InputInformationScreen()),
+                          );
+                        } else {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (_) => CalendarScreen()),
+                          );
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        minimumSize: const Size(0, 48),
                       ),
-                    );
-                  } else {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => CalendarScreen(),
+                      child: const Text(
+                        "확인",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontFamily: "NotoSansKR",
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                    );
-                  }
-                },
-                child: const Text('확인'),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         );
       } else {
         showDialog(
           context: context,
-          builder: (context) => AlertDialog(
+          barrierDismissible: false,
+          builder: (context) => Dialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             backgroundColor: Colors.white,
-            title: const Text('로그인 실패'),
-            content: const Text('일치하는 정보가 없습니다.'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('확인'),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    "로그인 실패",
+                    style: TextStyle(
+                      fontFamily: "NotoSansKR",
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    "일치하는 정보가 없습니다.",
+                    style: TextStyle(
+                      fontFamily: "NotoSansKR",
+                      fontSize: 15,
+                      fontWeight: FontWeight.w400,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 28),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        minimumSize: const Size(0, 48),
+                      ),
+                      child: const Text(
+                        "확인",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontFamily: "NotoSansKR",
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         );
       }

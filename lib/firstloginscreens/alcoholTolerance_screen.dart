@@ -4,8 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:todays_drink/providers/profile_provider.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:provider/provider.dart';
-import 'package:todays_drink/providers/profile_provider.dart';
 
 class AlcoholAmountScreen extends StatefulWidget {
   const AlcoholAmountScreen({super.key});

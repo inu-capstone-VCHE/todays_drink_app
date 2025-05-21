@@ -508,7 +508,7 @@ class _CalendarScreenState extends State<CalendarScreen>
                       firstDay: DateTime.utc(2020, 1, 1),
                       lastDay: DateTime.now(),
                       focusedDay: _focusedDay,
-                      selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                      selectedDayPredicate: (day) => _selectedDay != null && isSameDay(_selectedDay, day),
                       calendarFormat: CalendarFormat.month,
                       rowHeight: _showRecord ? 65 : 80,
                       daysOfWeekHeight: 24, // ✅ 요일 줄 높이 명시
@@ -539,21 +539,13 @@ class _CalendarScreenState extends State<CalendarScreen>
                           fontSize: 16,
                           color: Colors.grey,
                         ),
-                        todayDecoration: BoxDecoration(
-                          color: (_selectedDay == null ||
-                              isSameDay(_selectedDay, DateTime.now()))
-                              ? Color(0xFFF2D027)
-                              : Colors.transparent,
+                        todayDecoration: const BoxDecoration(
+                          color: Colors.transparent,
                           shape: BoxShape.circle,
                         ),
                         selectedDecoration: BoxDecoration(
                           color: Color(0xFFF2D027),
                           shape: BoxShape.circle,
-                        ),
-                        todayTextStyle: TextStyle(
-                          fontFamily: 'NotoSansKR',
-                          color: Colors.black,
-                          fontWeight: FontWeight.normal,
                         ),
                         selectedTextStyle: TextStyle(
                           fontFamily: 'NotoSansKR',
@@ -681,6 +673,34 @@ class _CalendarScreenState extends State<CalendarScreen>
                             );
                           }
                           return null;
+                        },
+
+                        todayBuilder: (context, day, focusedDay) {
+                          final isSelected = _selectedDay != null && isSameDay(_selectedDay!, day);
+                          final dateKey = "${day.year}-${day.month}-${day.day}";
+                          final hasRecord = drinkingRecords.containsKey(dateKey);
+
+                          if (isSelected) {
+                            // 선택된 오늘 날짜 → selectedBuilder에서 처리
+                            return null;
+                          }
+
+                          if (!isSelected && hasRecord) {
+                            // 오늘 날짜가 선택되지 않았고, 기록이 있는 경우 → 마커만 (숫자 안 그림)
+                            return const SizedBox.shrink();
+                          }
+
+                          return Center(
+                            child: Text(
+                              '${day.day}',
+                              style: const TextStyle(
+                                fontFamily: 'NotoSansKR',
+                                fontSize: 16,
+                                fontWeight: FontWeight.normal,
+                                color: Colors.black,
+                              ),
+                            ),
+                          );
                         },
                         selectedBuilder: (context, day, focusedDay) {
                           final dateKey = "${day.year}-${day.month}-${day.day}";
@@ -842,12 +862,14 @@ class _CalendarScreenState extends State<CalendarScreen>
         onPressed: () async {
           final result = await Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => DrinkingRecordScreen(
-              selectedDate: _selectedDay ?? DateTime.now(),
-            )),
+            MaterialPageRoute(
+              builder: (_) => DrinkingRecordScreen(
+                selectedDate: _selectedDay ?? DateTime.now(),
+              ),
+            ),
           );
 
-          if (result != null && result is DrinkingRecord) {
+          if (result != null && result is DrinkingRecord && result.title.trim().isNotEmpty) {
             String dateKey = "${result.date.year}-${result.date.month}-${result.date.day}";
             setState(() {
               if (!drinkingRecords.containsKey(dateKey)) {

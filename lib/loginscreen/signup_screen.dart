@@ -21,6 +21,8 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController _confirmPasswordController = TextEditingController();
   final TextEditingController _nicknameController = TextEditingController();
 
+  final Color primaryColor = const Color(0xFF2E7B8C);
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -36,24 +38,24 @@ class _SignupScreenState extends State<SignupScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "회원가입",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-            color: Colors.black,
-          ),
-        ),
+        backgroundColor: Colors.white,
+        centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
         elevation: 0,
-        backgroundColor: Colors.white,
+        title: const Text(
+          "회원가입",
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
       ),
       backgroundColor: Colors.white,
 
-      // ✅ 스크롤 가능한 입력 필드들
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20),
@@ -83,13 +85,12 @@ class _SignupScreenState extends State<SignupScreen> {
 
               buildTextField(hint: "닉네임", icon: Icons.person, controller: _nicknameController),
 
-              const SizedBox(height: 100), // 키보드 겹침 방지용 여유
+              const SizedBox(height: 100),
             ],
           ),
         ),
       ),
 
-      // ✅ 하단 고정 버튼
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
         child: SizedBox(
@@ -97,7 +98,7 @@ class _SignupScreenState extends State<SignupScreen> {
           child: ElevatedButton(
             onPressed: signupUser,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2D6876),
+              backgroundColor: primaryColor,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
             child: const Text(
@@ -115,10 +116,18 @@ class _SignupScreenState extends State<SignupScreen> {
       padding: const EdgeInsets.only(bottom: 20.0),
       child: TextField(
         controller: controller,
+        cursorColor: primaryColor,
         decoration: InputDecoration(
           hintText: hint,
           prefixIcon: Icon(icon),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: primaryColor, width: 2),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.grey.shade600),
+          ),
           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
         ),
       ),
@@ -135,6 +144,7 @@ class _SignupScreenState extends State<SignupScreen> {
       padding: const EdgeInsets.only(bottom: 20.0),
       child: TextField(
         controller: controller,
+        cursorColor: primaryColor,
         obscureText: !isVisible,
         decoration: InputDecoration(
           hintText: hint,
@@ -143,7 +153,14 @@ class _SignupScreenState extends State<SignupScreen> {
             icon: Icon(isVisible ? Icons.visibility : Icons.visibility_off),
             onPressed: toggle,
           ),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: primaryColor, width: 2),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.grey.shade600),
+          ),
           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
         ),
       ),
@@ -182,23 +199,64 @@ class _SignupScreenState extends State<SignupScreen> {
   void _showSignupSuccessDialog(BuildContext context) {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (BuildContext context) {
-        return AlertDialog(
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           backgroundColor: Colors.white,
-          title: const Text("회원가입 성공!🎉🎉"),
-          content: const Text("회원가입이 완료되었습니다."),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const StartScreen2()),
-                );
-              },
-              child: const Text("확인"),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  "회원가입 성공! 🎉🎉",
+                  style: TextStyle(
+                    fontFamily: "NotoSansKR",
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  "회원가입이 완료되었습니다.",
+                  style: TextStyle(
+                    fontFamily: "NotoSansKR",
+                    fontSize: 15,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 28),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => const StartScreen2()),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      minimumSize: const Size(0, 48),
+                    ),
+                    child: const Text(
+                      "확인",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontFamily: "NotoSansKR",
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         );
       },
     );
